@@ -32,10 +32,20 @@ namespace StardewChatter
                 var npc = GetTalkableNpc();
                 if (npc != null)
                 {
+                    string remaining = "";
                     foreach (var dialogue in npc.CurrentDialogue)
                     {
-                        Monitor.Log(dialogue.getCurrentDialogue(), LogLevel.Debug);
+                       remaining += "\n\t" + dialogue.getCurrentDialogue();
                     }
+                    if (npc.CurrentDialogue.Count == 0)
+                    {
+                        npc.CurrentDialogue.Push(new Dialogue("Anyway let's hang sometime.", npc));
+                    }
+                    Monitor.Log($"{npc.Name} remaining dialogue: {remaining}", LogLevel.Debug);
+                }
+                else
+                {
+                    Monitor.Log("No NPC", LogLevel.Debug);
                 }
             }
         }
@@ -48,7 +58,7 @@ namespace StardewChatter
 
         private static NPC GetTalkableNpc()
         {
-           return Game1.currentLocation.isCharacterAtTile(Game1.GetPlacementGrabTile());
+           return Game1.currentLocation.isCharacterAtTile(Game1.currentCursorTile);
         }
 
         private void LogCursorTile()
