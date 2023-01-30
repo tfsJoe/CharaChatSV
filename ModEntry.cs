@@ -35,7 +35,7 @@ namespace StardewChatter
                     string remaining = "";
                     foreach (var dialogue in npc.CurrentDialogue)
                     {
-                       remaining += "\n\t" + dialogue.getCurrentDialogue();
+                        remaining += "\n\t" + string.Join('|', dialogue.dialogues);
                     }
                     if (npc.CurrentDialogue.Count == 0)
                     {
