@@ -1,0 +1,10 @@
+{
+	"Name": "StardewChatter",
+	"Author": "Me",
+	"Version": "0.1.0",
+	"Description": "Deeper conversations with the other inhabitants of Stardew Valley",
+	"UniqueID": "Me.StardewChatter",
+	"EntryDll": "StardewChatter.dll",
+	"MinimumApiVersion": "3.0.0",
+	"UpdateKeys": []
+}
