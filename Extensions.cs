@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -30,6 +31,17 @@ namespace StardewChatter
         public static bool CanChat(this NPC npc)
         {
             return npc.IsCursorOver() && npc.IsInConvoRange() && npc.IsDialogueEmpty();
+        }
+
+        public static void DrawPortrait(this NPC npc, SpriteBatch batch,
+            Emotion emotion = Emotion.Neutral, Rectangle? destinationRect = null)
+        {
+            if (destinationRect == null)
+            {
+                destinationRect = new Rectangle(Game1.viewport.Width - 256, 0, 128, 128);
+            }
+            batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
+                sourceRectangle: PortraitUtil.EmotionToPortraitRect(emotion), Color.White);
         }
     }
 }

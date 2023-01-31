@@ -18,6 +18,8 @@ namespace StardewChatter
         {
             this.helper = helper;
             Recenter();
+            initialize(x, yTop + yBottom, w, hTop + hBottom, true);
+            
         }
 
         public override void draw(SpriteBatch b)
@@ -29,6 +31,11 @@ namespace StardewChatter
 
             Game1.drawDialogueBox(x, yTop, w, hTop, true, true, "top");
             Game1.drawDialogueBox(x, yBottom, w, hBottom, false, true, "bottom");
+
+            var npc = Game1.getCharacterFromName("Haley");
+            npc.DrawPortrait(b);
+
+            drawMouse(b);
         }
 
         private void Recenter()
@@ -40,7 +47,6 @@ namespace StardewChatter
             x = (Game1.viewport.Width - w) / 2;
             yTop = 0;
             yBottom = hTop;
-            //y = (int)(y * 0.85f);    // inexplicable headroom
         }
     }
 }
