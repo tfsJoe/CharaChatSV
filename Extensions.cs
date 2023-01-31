@@ -11,16 +11,25 @@ namespace StardewChatter
     {
         public static bool IsInConvoRange(this NPC npc)
         {
-            var npcLoc = npc.getTileLocation();
-            var playerLoc = Game1.player.getTileLocation();
-            var xDist = Math.Abs(npcLoc.X - playerLoc.X);
-            var yDist = Math.Abs(npcLoc.Y - playerLoc.Y);
-            return xDist < 1f && yDist < 1f;
+            var sqDist = Vector2.DistanceSquared(npc.getTileLocation(), Game1.player.getTileLocation());
+            return sqDist <= 2;
         }
 
         public static bool IsCursorOver(this NPC npc)
         {
             return npc.getTileLocation() == Game1.currentCursorTile;
+        }
+
+        public static bool isDialogueEmpty(this NPC npc)
+        {
+            if (npc.CurrentDialogue == null) return true;
+            if (npc.CurrentDialogue.Count == 0) return true;
+            return false;
+        }
+
+        public static bool canChat(this NPC npc)
+        {
+            return npc.IsCursorOver() && npc.IsInConvoRange() && npc.isDialogueEmpty();
         }
     }
 }

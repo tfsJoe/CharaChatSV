@@ -22,19 +22,13 @@ namespace StardewChatter
         /// <param name="e">The event data.</param>
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            // ignore if player hasn't loaded a save yet
-            if (!Context.IsWorldReady)
+            if (!Context.IsWorldReady || !Context.IsPlayerFree || Game1.isTimePaused)
                 return;
 
-            if (e.Button == SButton.P && Context.IsPlayerFree && !Game1.isTimePaused)
+            if (e.Button == SButton.P)
             {
                 LogCursorTile();
-                foreach (var npc in Game1.currentLocation.characters)
-                {
-                    Monitor.Log($"{npc.Name}: ({npc.getTileLocation()}) " +
-                        $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
-                        $"{(npc.IsCursorOver() ? " | Pointing" : "")}", LogLevel.Debug);
-                }
+                LogCharactersStatus();
             }
         }
 
@@ -49,6 +43,17 @@ namespace StardewChatter
             Monitor.Log($"\nTile ({Game1.currentCursorTile}))" +
                 $"\tspeech? {Game1.isSpeechAtCurrentCursorTile}\taction? {Game1.isActionAtCurrentCursorTile} \t" +
                 $"insp? {Game1.isInspectionAtCurrentCursorTile}\t", LogLevel.Debug);
+        }
+
+        private void LogCharactersStatus()
+        {
+            foreach (var npc in Game1.currentLocation.characters)
+            {
+                Monitor.Log($"{npc.Name}: ({npc.getTileLocation()}) " +
+                    $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
+                    $"{(npc.IsCursorOver() ? " | Pointing" : "")}" +
+                    $"{(npc.isDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
+            }
         }
     }
 }
