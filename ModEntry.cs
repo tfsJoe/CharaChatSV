@@ -81,6 +81,7 @@ namespace StardewChatter
         private async void LogFromWeb()
         {
             var fact = await StringFetcher.GetCatFact();
+            chatWindow.npcText = fact;
             Log(fact);
         }
 

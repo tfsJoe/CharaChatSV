@@ -13,6 +13,7 @@ namespace StardewChatter
     {
         private readonly IModHelper helper;
         int x, yTop, yBottom, w, hTop, hBottom;
+        public string npcText = "";
 
         public ChatWindow(IModHelper helper)
         {
@@ -34,7 +35,21 @@ namespace StardewChatter
             var npc = Game1.getCharacterFromName("Haley");
             npc.DrawPortrait(b);
 
+            if (!string.IsNullOrEmpty(npcText))
+            {
+                Game1.drawWithBorder(npcText, Color.Orange, Color.MediumPurple, new(x, yTop));
+            }
+
             drawMouse(b);
+        }
+
+        public void PrintNPCString(string message)
+        {
+            if (!IsActive())
+            {
+                ModEntry.Log($"Message received but ChatWindow was not active. Message:\n{message}");
+            }
+            Game1.drawWithBorder(message, Color.Orange, Color.MediumPurple, new (x, yTop));
         }
 
         private void Recenter()
