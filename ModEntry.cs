@@ -29,23 +29,11 @@ namespace StardewChatter
             if (e.Button == SButton.P && Context.IsPlayerFree && !Game1.isTimePaused)
             {
                 LogCursorTile();
-                var npc = GetTalkableNpc();
-                if (npc != null)
+                foreach (var npc in Game1.currentLocation.characters)
                 {
-                    string remaining = "";
-                    foreach (var dialogue in npc.CurrentDialogue)
-                    {
-                        remaining += "\n\t" + string.Join('|', dialogue.dialogues);
-                    }
-                    if (npc.CurrentDialogue.Count == 0)
-                    {
-                        npc.CurrentDialogue.Push(new Dialogue("Anyway let's hang sometime.", npc));
-                    }
-                    Monitor.Log($"{npc.Name} remaining dialogue: {remaining}", LogLevel.Debug);
-                }
-                else
-                {
-                    Monitor.Log("No NPC", LogLevel.Debug);
+                    Monitor.Log($"{npc.Name}: ({npc.getTileLocation()}) " +
+                        $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
+                        $"{(npc.IsCursorOver() ? " | Pointing" : "")}", LogLevel.Debug);
                 }
             }
         }
@@ -56,14 +44,9 @@ namespace StardewChatter
             Game1.drawDialogue(linus, "Howdy");
         }
 
-        private static NPC GetTalkableNpc()
-        {
-           return Game1.currentLocation.isCharacterAtTile(Game1.currentCursorTile);
-        }
-
         private void LogCursorTile()
         {
-            Monitor.Log($"Tile ({Game1.currentCursorTile}))" +
+            Monitor.Log($"\nTile ({Game1.currentCursorTile}))" +
                 $"\tspeech? {Game1.isSpeechAtCurrentCursorTile}\taction? {Game1.isActionAtCurrentCursorTile} \t" +
                 $"insp? {Game1.isInspectionAtCurrentCursorTile}\t", LogLevel.Debug);
         }
