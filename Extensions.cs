@@ -20,16 +20,16 @@ namespace StardewChatter
             return npc.getTileLocation() == Game1.currentCursorTile;
         }
 
-        public static bool isDialogueEmpty(this NPC npc)
+        public static bool IsDialogueEmpty(this NPC npc)
         {
             if (npc.CurrentDialogue == null) return true;
             if (npc.CurrentDialogue.Count == 0) return true;
             return false;
         }
 
-        public static bool canChat(this NPC npc)
+        public static bool CanChat(this NPC npc)
         {
-            return npc.IsCursorOver() && npc.IsInConvoRange() && npc.isDialogueEmpty();
+            return npc.IsCursorOver() && npc.IsInConvoRange() && npc.IsDialogueEmpty();
         }
     }
 }

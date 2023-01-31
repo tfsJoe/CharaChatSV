@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -10,11 +11,17 @@ namespace StardewChatter
     /// <summary>The mod entry point.</summary>
     internal sealed class ModEntry : Mod
     {
+        static IMonitor monitor;
+        public static NPC interlocutor = null;
+        ChatWindow chatWindow;
+
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            if (monitor == null) monitor = Monitor;
+            chatWindow = new ChatWindow(helper);
         }
 
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
@@ -25,11 +32,25 @@ namespace StardewChatter
             if (!Context.IsWorldReady || !Context.IsPlayerFree || Game1.isTimePaused)
                 return;
 
-            if (e.Button == SButton.P)
+            // testing block
+            if (e.Button == SButton.M)
             {
-                LogCursorTile();
-                LogCharactersStatus();
+                Game1.activeClickableMenu = chatWindow;
+                return;
             }
+
+            if (e.Button != SButton.MouseRight) return;
+
+            interlocutor = GetClickedNpcWhoCanChat();
+            if (interlocutor == null) return;
+
+            Game1.activeClickableMenu = chatWindow;
+            Log("Activated chat window");
+        }
+
+        private NPC GetClickedNpcWhoCanChat()
+        {
+            return Game1.currentLocation.characters.FirstOrDefault(npc => npc.CanChat());
         }
 
         private static void LinusHowdy()
@@ -52,8 +73,14 @@ namespace StardewChatter
                 Monitor.Log($"{npc.Name}: ({npc.getTileLocation()}) " +
                     $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
                     $"{(npc.IsCursorOver() ? " | Pointing" : "")}" +
-                    $"{(npc.isDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
+                    $"{(npc.IsDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
             }
+        }
+
+        public static void Log(string message)
+        {
+            if (monitor == null) return;
+            monitor.Log(message, LogLevel.Debug);
         }
     }
 }
