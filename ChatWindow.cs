@@ -19,7 +19,6 @@ namespace StardewChatter
             this.helper = helper;
             Recenter();
             initialize(x, yTop + yBottom, w, hTop + hBottom, true);
-            
         }
 
         public override void draw(SpriteBatch b)

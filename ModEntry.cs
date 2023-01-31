@@ -36,6 +36,7 @@ namespace StardewChatter
             if (e.Button == SButton.M)
             {
                 Game1.activeClickableMenu = chatWindow;
+                LogFromWeb();   //TODO make this part of the menu
                 return;
             }
 
@@ -75,6 +76,12 @@ namespace StardewChatter
                     $"{(npc.IsCursorOver() ? " | Pointing" : "")}" +
                     $"{(npc.IsDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
             }
+        }
+
+        private async void LogFromWeb()
+        {
+            var fact = await StringFetcher.GetCatFact();
+            Log(fact);
         }
 
         public static void Log(string message)
