@@ -9,13 +9,13 @@ using System;
 
 namespace StardewChatter
 {
-    class ChatWindow : IClickableMenu
+    class ConvoWindow : IClickableMenu
     {
         private readonly IModHelper helper;
         int x, yTop, yBottom, w, hTop, hBottom;
         public string npcText = "";
 
-        public ChatWindow(IModHelper helper)
+        public ConvoWindow(IModHelper helper)
         {
             this.helper = helper;
             Recenter();

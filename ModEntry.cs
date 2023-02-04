@@ -13,7 +13,7 @@ namespace StardewChatter
     {
         static IMonitor monitor;
         public static NPC interlocutor = null;
-        ChatWindow chatWindow;
+        ConvoWindow _convoWindow;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -21,7 +21,7 @@ namespace StardewChatter
         {
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             if (monitor == null) monitor = Monitor;
-            chatWindow = new ChatWindow(helper);
+            _convoWindow = new ConvoWindow(helper);
         }
 
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
@@ -35,7 +35,7 @@ namespace StardewChatter
             // testing block
             if (e.Button == SButton.M)
             {
-                Game1.activeClickableMenu = chatWindow;
+                Game1.activeClickableMenu = _convoWindow;
                 LogFromWeb();   //TODO make this part of the menu
                 return;
             }
@@ -45,7 +45,7 @@ namespace StardewChatter
             interlocutor = GetClickedNpcWhoCanChat();
             if (interlocutor == null) return;
 
-            Game1.activeClickableMenu = chatWindow;
+            Game1.activeClickableMenu = _convoWindow;
             Log("Activated chat window");
         }
 
@@ -81,7 +81,7 @@ namespace StardewChatter
         private async void LogFromWeb()
         {
             var fact = await StringFetcher.GetCatFact();
-            chatWindow.npcText = fact;
+            _convoWindow.npcText = fact;
             Log(fact);
         }
 
