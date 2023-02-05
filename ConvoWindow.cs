@@ -2,12 +2,10 @@
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
-using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
-using StardewValley.GameData.HomeRenovations;
 
 namespace StardewChatter
 {
@@ -15,6 +13,8 @@ namespace StardewChatter
     {
         private readonly IModHelper helper; //SMAPI helper, not Stardew-native
         private int x, yTop, yBottom, w, hTop, hBottom;
+        private TextInput textInput;
+        private InputTextBox tb;
 
         private NPC interlocutor;
         private string playerPrompt = "";   // TODO: print when appropriate
@@ -29,16 +29,27 @@ namespace StardewChatter
                 status = value;
                 if (value == Status.Closed)
                 {
+                    textInput.UnsubscribeAllEvents(helper.Events);
                     Game1.activeClickableMenu = null;
+                }
+                else
+                {
+                    textInput.SubscribeAllEvents(helper.Events);
                 }
             }
         }
+        
+        private Rectangle NpcTextRect => new Rectangle(x: x + 35, y: yTop + 128, width: w - 67, height: hTop - 160);
+        private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yBottom + 32, width: w - 179, height: hBottom);
+        private static Color NpcTextColor => new Color(86, 22, 12, 255);
+        
 
         public ConvoWindow(IModHelper helper)
         {
             this.helper = helper;
             Recenter();
             initialize(x, yTop + yBottom, w, hTop + hBottom, true);
+            textInput = new TextInput(PlayerTextRect);
         }
 
         /// <summary>
@@ -84,27 +95,31 @@ namespace StardewChatter
             Recenter();
 
             b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.75f);
-
-            Game1.drawDialogueBox(x, yTop, w, hTop, true, true, "top");
+            
+            // Player input portion
             Game1.drawDialogueBox(x, yBottom, w, hBottom, false, true, "bottom");
+            textInput.Draw(b);
+            
+            // NPC response portion
+            Game1.drawDialogueBox(x, yTop, w, hTop, true, true, "top");
 
             switch (status)
             {
                 case Status.OpenInit:
                     DrawWordWrappedTextBox(b, $"(Say something to {interlocutor?.Name})",
-                        GetNpcTextRect(), Game1.dialogueFont, Color.Brown);
+                        NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenWaiting:
                     DrawWordWrappedTextBox(b, GetSpinnerString(),
-                        GetNpcTextRect(), Game1.dialogueFont, Color.Brown);
+                        NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenDisplaying:
                     interlocutor?.DrawPortrait(b);
 
                     if (!string.IsNullOrEmpty(npcReply))
                     {
-                        DrawWordWrappedTextBox(b, npcReply, 
-                            GetNpcTextRect(), Game1.dialogueFont, Color.Brown);
+                        DrawWordWrappedTextBox(b, npcReply,
+                            NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     }
                     break;
                 case Status.Closed:
@@ -112,7 +127,7 @@ namespace StardewChatter
                     Game1.activeClickableMenu = null;
                     break;
             }
-
+            
             drawMouse(b);
         }
 
@@ -159,7 +174,9 @@ namespace StardewChatter
 
             foreach (var textLine in lines)
             {
-                spriteBatch.DrawString(font, textLine, new Vector2(box.X, y), color);
+                // spriteBatch.DrawString(font, textLine, new Vector2(box.X, y), color);
+                Utility.drawTextWithShadow(spriteBatch, textLine, font, new Vector2(box.X, y), color);
+                Utility.drawBoldText(spriteBatch, textLine, font, new Vector2(box.X, y), color);
                 y += lineHeight;
             }
             
@@ -168,13 +185,6 @@ namespace StardewChatter
 #endif
         }
         
-        // TODO: cache to optimize?
-        // TODO: use better anchoring?
-        Rectangle GetNpcTextRect()
-        {
-            return new Rectangle(x: x + 34, y: yTop + 128, width: w - 66, height: hTop - 160);
-        }
-
         private void Recenter()
         {
             float scale = 1f / Game1.options.uiScale;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -11,17 +12,17 @@ namespace StardewChatter
     /// <summary>The mod entry point.</summary>
     internal sealed class ModEntry : Mod
     {
-        static IMonitor monitor;
-        public static NPC interlocutor = null;
-        ConvoWindow _convoWindow;
+        private static IMonitor monitor;
+        private static NPC interlocutor = null;
+        private ConvoWindow convoWindow;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-            if (monitor == null) monitor = Monitor;
-            _convoWindow = new ConvoWindow(helper);
+            helper.Events.Input.ButtonPressed += OnButtonPressed;
+            monitor ??= Monitor;
+            convoWindow = new ConvoWindow(helper);
         }
 
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
@@ -38,15 +39,15 @@ namespace StardewChatter
             {
                 case SButton.H:
                     Log("Debug: talk to Haley");
-                    _convoWindow.Converse(Game1.getCharacterFromName("Haley"), "Tell me a cat fact, Haley.");
+                    convoWindow.Converse(Game1.getCharacterFromName("Haley"), "Tell me a cat fact, Haley.");
                     return;
                 case SButton.L:
                     Log("Debug: talk to Lewis");
-                    _convoWindow.Converse(Game1.getCharacterFromName("Lewis"));
+                    convoWindow.Converse(Game1.getCharacterFromName("Lewis"));
                     break;
                 case SButton.P:
                     Log("Simulating hanging web response");
-                    _convoWindow.SimulateWebHang();
+                    convoWindow.SimulateWebHang();
                     break;
             }
             #endif
@@ -63,6 +64,7 @@ namespace StardewChatter
         }
         
         #region debug
+        #if DEBUG
         private static void LinusHowdy()
         {
             var linus = Game1.getCharacterFromName("Linus");
@@ -86,7 +88,8 @@ namespace StardewChatter
                             $"{(npc.IsDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
             }
         }
-
+        #endif
+        
         public static void Log(string message)
         {
             if (monitor == null) return;
