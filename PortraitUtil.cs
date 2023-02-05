@@ -6,7 +6,6 @@ namespace StardewChatter
     {
         public static Rectangle EmotionStringToPortraitRect(string emotion)
         {
-			Rectangle portraitRect;
             switch (emotion)
             {
 				case "$h":

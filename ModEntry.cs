@@ -32,28 +32,37 @@ namespace StardewChatter
             if (!Context.IsWorldReady || !Context.IsPlayerFree || Game1.isTimePaused)
                 return;
 
-            // testing block
-            if (e.Button == SButton.M)
+            
+            #if DEBUG
+            switch (e.Button)
             {
-                Game1.activeClickableMenu = _convoWindow;
-                LogFromWeb();   //TODO make this part of the menu
-                return;
+                case SButton.H:
+                    Log("Debug: talk to Haley");
+                    _convoWindow.Converse(Game1.getCharacterFromName("Haley"), "Tell me a cat fact, Haley.");
+                    return;
+                case SButton.L:
+                    Log("Debug: talk to Lewis");
+                    _convoWindow.Converse(Game1.getCharacterFromName("Lewis"));
+                    break;
+                case SButton.P:
+                    Log("Simulating hanging web response");
+                    _convoWindow.SimulateWebHang();
+                    break;
             }
+            #endif
 
             if (e.Button != SButton.MouseRight) return;
 
             interlocutor = GetClickedNpcWhoCanChat();
             if (interlocutor == null) return;
-
-            Game1.activeClickableMenu = _convoWindow;
-            Log("Activated chat window");
         }
 
         private NPC GetClickedNpcWhoCanChat()
         {
             return Game1.currentLocation.characters.FirstOrDefault(npc => npc.CanChat());
         }
-
+        
+        #region debug
         private static void LinusHowdy()
         {
             var linus = Game1.getCharacterFromName("Linus");
@@ -63,8 +72,8 @@ namespace StardewChatter
         private void LogCursorTile()
         {
             Monitor.Log($"\nTile ({Game1.currentCursorTile}))" +
-                $"\tspeech? {Game1.isSpeechAtCurrentCursorTile}\taction? {Game1.isActionAtCurrentCursorTile} \t" +
-                $"insp? {Game1.isInspectionAtCurrentCursorTile}\t", LogLevel.Debug);
+                        $"\tspeech? {Game1.isSpeechAtCurrentCursorTile}\taction? {Game1.isActionAtCurrentCursorTile} \t" +
+                        $"insp? {Game1.isInspectionAtCurrentCursorTile}\t", LogLevel.Debug);
         }
 
         private void LogCharactersStatus()
@@ -72,17 +81,10 @@ namespace StardewChatter
             foreach (var npc in Game1.currentLocation.characters)
             {
                 Monitor.Log($"{npc.Name}: ({npc.getTileLocation()}) " +
-                    $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
-                    $"{(npc.IsCursorOver() ? " | Pointing" : "")}" +
-                    $"{(npc.IsDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
+                            $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
+                            $"{(npc.IsCursorOver() ? " | Pointing" : "")}" +
+                            $"{(npc.IsDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
             }
-        }
-
-        private async void LogFromWeb()
-        {
-            var fact = await StringFetcher.GetCatFact();
-            _convoWindow.npcText = fact;
-            Log(fact);
         }
 
         public static void Log(string message)
@@ -90,5 +92,6 @@ namespace StardewChatter
             if (monitor == null) return;
             monitor.Log(message, LogLevel.Debug);
         }
+        #endregion
     }
 }

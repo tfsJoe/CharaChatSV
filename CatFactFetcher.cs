@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace StardewChatter
 {
-    public class StringFetcher
+    public class CatFactFetcher
     {
         private const string catFactsUrl = "https://catfact.ninja/fact?max_length=512";
-        private static StringFetcher inst;
+        private static CatFactFetcher inst;
         private readonly HttpClient client = new();
 
         public static async Task<string> GetCatFact()
@@ -33,12 +33,14 @@ namespace StardewChatter
             }
             catch (JsonException e)
             {
-                return $"(Poorly formed response: {e.Message}";
+                fact = $"(Poorly formed response: {e.Message}";
             }
             catch (KeyNotFoundException)
             {
-                return $"(Couldn't extract fact)\n{json}";
+                fact = $"(Couldn't extract fact)\n{json}";
             }
+
+            ModEntry.Log(fact);
             return fact;
         }
     }
