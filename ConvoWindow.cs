@@ -13,8 +13,7 @@ namespace StardewChatter
     {
         private readonly IModHelper helper; //SMAPI helper, not Stardew-native
         private int x, yTop, yBottom, w, hTop, hBottom;
-        private TextInput textInput;
-        private InputTextBox tb;
+        private readonly TextInput textInput;
 
         private NPC interlocutor;
         private string playerPrompt = "";   // TODO: print when appropriate
@@ -29,18 +28,18 @@ namespace StardewChatter
                 status = value;
                 if (value == Status.Closed)
                 {
-                    textInput.UnsubscribeAllEvents(helper.Events);
+                    textInput?.UnsubscribeAll(helper.Events);
                     Game1.activeClickableMenu = null;
                 }
                 else
                 {
-                    textInput.SubscribeAllEvents(helper.Events);
+                    textInput?.SubscribeAll(helper.Events);
                 }
             }
         }
         
         private Rectangle NpcTextRect => new Rectangle(x: x + 35, y: yTop + 128, width: w - 67, height: hTop - 160);
-        private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yBottom + 32, width: w - 179, height: hBottom);
+        private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yBottom + 128, width: w - 179, height: hBottom - 128);
         private static Color NpcTextColor => new Color(86, 22, 12, 255);
         
 
@@ -53,7 +52,7 @@ namespace StardewChatter
         }
 
         /// <summary>
-        /// Use this rather than setting Game1.activeClickableMenu from elsewhere.
+        /// Use this, rather than setting Game1.activeClickableMenu from elsewhere.
         /// Warning: if you do not, behavior will be unpredictable. May show old convos.
         /// </summary>
         /// <param name="npc">To which NPC is the player speaking?</param>
@@ -101,16 +100,19 @@ namespace StardewChatter
             textInput.Draw(b);
             
             // NPC response portion
+#if DEBUG
+            b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
+#endif
             Game1.drawDialogueBox(x, yTop, w, hTop, true, true, "top");
 
             switch (status)
             {
                 case Status.OpenInit:
-                    DrawWordWrappedTextBox(b, $"(Say something to {interlocutor?.Name})",
+                    Extensions.DrawWordWrappedText(b, $"(Say something to {interlocutor?.Name})",
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenWaiting:
-                    DrawWordWrappedTextBox(b, GetSpinnerString(),
+                    Extensions.DrawWordWrappedText(b, GetSpinnerString(),
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenDisplaying:
@@ -118,7 +120,7 @@ namespace StardewChatter
 
                     if (!string.IsNullOrEmpty(npcReply))
                     {
-                        DrawWordWrappedTextBox(b, npcReply,
+                        Extensions.DrawWordWrappedText(b, npcReply,
                             NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     }
                     break;
@@ -138,7 +140,6 @@ namespace StardewChatter
             {
                 case 1: return ".";
                 case 2: return "..";
-                case 3:
                 default:
                     return "...";
             }
@@ -150,41 +151,6 @@ namespace StardewChatter
             base.cleanupBeforeExit();
         }
 
-        private static void DrawWordWrappedTextBox(SpriteBatch spriteBatch, string text, Rectangle box, SpriteFont font, Color color)
-        {
-            var lines = new List<string>();
-            var line = "";
-            var words = text.Split(' ');
-
-            foreach (var word in words)
-            {
-                if (font.MeasureString(line + word).X > box.Width)
-                {
-                    lines.Add(line);
-                    line = "";
-                }
-
-                line += word + " ";
-            }
-
-            lines.Add(line);
-
-            var lineHeight = font.LineSpacing;
-            var y = box.Y;
-
-            foreach (var textLine in lines)
-            {
-                // spriteBatch.DrawString(font, textLine, new Vector2(box.X, y), color);
-                Utility.drawTextWithShadow(spriteBatch, textLine, font, new Vector2(box.X, y), color);
-                Utility.drawBoldText(spriteBatch, textLine, font, new Vector2(box.X, y), color);
-                y += lineHeight;
-            }
-            
-#if DEBUG
-            spriteBatch.Draw(Game1.fadeToBlackRect, box, Color.Aqua * .15f);
-#endif
-        }
-        
         private void Recenter()
         {
             float scale = 1f / Game1.options.uiScale;

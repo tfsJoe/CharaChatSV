@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -39,6 +40,38 @@ namespace StardewChatter
             destinationRect ??= new Rectangle(Game1.viewport.Width - 256, 0, 128, 128);
             batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
                 sourceRectangle: PortraitUtil.EmotionToPortraitRect(emotion), Color.White);
+        }
+
+        public static void DrawWordWrappedText(SpriteBatch spriteBatch, string text, Rectangle box, SpriteFont font,
+            Color color)
+        {
+            var lines = new List<string>();
+            var line = "";
+            var words = text.Split(' ');
+
+            foreach (var word in words)
+            {
+                if (font.MeasureString(line + word).X > box.Width)
+                {
+                    lines.Add(line);
+                    line = "";
+                }
+
+                line += word + " ";
+            }
+
+            lines.Add(line);
+
+            var lineHeight = font.LineSpacing;
+            var y = box.Y;
+
+            foreach (var textLine in lines)
+            {
+                // spriteBatch.DrawString(font, textLine, new Vector2(box.X, y), color);
+                Utility.drawTextWithShadow(spriteBatch, textLine, font, new Vector2(box.X, y), color);
+                Utility.drawBoldText(spriteBatch, textLine, font, new Vector2(box.X, y), color);
+                y += lineHeight;
+            }
         }
     }
 }
