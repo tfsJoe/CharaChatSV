@@ -28,14 +28,16 @@ namespace StardewChatter
         /// </summary>
         public void SubscribeAll(IModEvents events)
         {
+            // ModEntry.Log($"Keyboard Dispatcher was: {Game1.keyboardDispatcher.Subscriber?.GetType().FullName}");
+            if (Game1.keyboardDispatcher.Subscriber == this) return;
             previousSubscriber = Game1.keyboardDispatcher.Subscriber;
             Game1.keyboardDispatcher.Subscriber = this;
-            
+            // ModEntry.Log($"Keyboard Dispatcher now: {Game1.keyboardDispatcher.Subscriber.GetType().FullName}.");
         }
-
-
+        
         public void UnsubscribeAll(IModEvents events)
         {
+            // ModEntry.Log($"Restoring previous keyboard dispatcher subscriber: {previousSubscriber?.GetType().FullName}");
             Game1.keyboardDispatcher.Subscriber = previousSubscriber;
         }
 
@@ -55,12 +57,12 @@ namespace StardewChatter
         {
             if (Content.Length >= MAX_CHAR_COUNT) return;
             Content += inputChar;
-            ModEntry.Log(Content);
+            // ModEntry.Log(Content);
         }
 
         void IKeyboardSubscriber.RecieveTextInput(string text)
         {
-            ModEntry.Log($"Received string: {text}");
+            // ModEntry.Log($"Received string: {text}");
             if (Content.Length >= MAX_CHAR_COUNT) return;
             if (Content.Length + text.Length > MAX_CHAR_COUNT)
             {
@@ -71,7 +73,7 @@ namespace StardewChatter
 
         void IKeyboardSubscriber.RecieveCommandInput(char command)
         {
-            if (command == '\b')
+            if (command == '\b' && Content.Length > 0)
             {
                 Content = Content.Substring(0, Content.Length - 1); // TODO acct for caret
             }
@@ -90,7 +92,7 @@ namespace StardewChatter
                 selected = value;
                 if (selected)
                 {
-                    // TODO: Handle subscripton/unsubscription?
+                    //...
                 }
             }
         }

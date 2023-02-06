@@ -28,6 +28,7 @@ namespace StardewChatter
                 status = value;
                 if (value == Status.Closed)
                 {
+                    // ModEntry.Log("Closing ConvoWindow.");
                     textInput?.UnsubscribeAll(helper.Events);
                     Game1.activeClickableMenu = null;
                 }
@@ -39,7 +40,7 @@ namespace StardewChatter
         }
         
         private Rectangle NpcTextRect => new Rectangle(x: x + 35, y: yTop + 128, width: w - 67, height: hTop - 160);
-        private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yBottom + 128, width: w - 179, height: hBottom - 128);
+        private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yBottom + 64, width: w - 179, height: hBottom - 128);
         private static Color NpcTextColor => new Color(86, 22, 12, 255);
         
 
@@ -61,7 +62,7 @@ namespace StardewChatter
         {
             if (npc == null)
             {
-                ModEntry.Log("Tried to enter conversation with nobody.");
+                // ModEntry.Log("Tried to enter conversation with nobody.");
                 Status = Status.Closed;
                 return;
             }
@@ -147,7 +148,9 @@ namespace StardewChatter
 
         protected override void cleanupBeforeExit()
         {
+            // ModEntry.Log("Cleaning up ConvoWindow");
             status = Status.Closed;
+            textInput.UnsubscribeAll(helper.Events);
             base.cleanupBeforeExit();
         }
 
