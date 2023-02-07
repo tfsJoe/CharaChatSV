@@ -13,11 +13,28 @@ namespace StardewChatter
     {
         private Rectangle rect;
         private bool selected;
-        private const int MAX_CHAR_COUNT = 300;
-        public string Content { get; private set; } = "";
-
         private IKeyboardSubscriber previousSubscriber;
         
+        private const int MAX_CHAR_COUNT = 300;
+        public string Content { get; private set; } = "";
+        private static SpriteFont Font => Game1.dialogueFont;
+        private int caretIndex = 0;
+        private int CaretIndex
+        {
+            get
+            {
+                if (caretIndex < 0) caretIndex = 0;
+                if (caretIndex > Content.Length) caretIndex = Content.Length;
+                return caretIndex;
+            }
+            set
+            {
+                if (value < 0) caretIndex = 0;
+                else if (value > Content.Length) caretIndex = Content.Length;
+                else caretIndex = value;
+            }
+        }
+
         public TextInput(Rectangle rect)
         {
             this.rect = rect;
@@ -46,11 +63,9 @@ namespace StardewChatter
             #if DEBUG
             spriteBatch.Draw(Game1.fadeToBlackRect, rect, Color.MediumOrchid * 0.15f);
             #endif
-
-            if (!string.IsNullOrEmpty(Content))
-            {
-                spriteBatch.DrawString(Game1.dialogueFont, Content, new Vector2(rect.X, rect.Y), Color.Black);
-            }
+            
+            spriteBatch.DrawString(Font, Content, new Vector2(rect.X, rect.Y), Color.Black);
+            
         }
 
         void IKeyboardSubscriber.RecieveTextInput(char inputChar)
@@ -76,6 +91,10 @@ namespace StardewChatter
             if (command == '\b' && Content.Length > 0)
             {
                 Content = Content.Substring(0, Content.Length - 1); // TODO acct for caret
+            }
+            else
+            {
+                ModEntry.Log($"Command: {((int)command).ToString()}");
             }
         }
 

@@ -109,11 +109,11 @@ namespace StardewChatter
             switch (status)
             {
                 case Status.OpenInit:
-                    Extensions.DrawWordWrappedText(b, $"(Say something to {interlocutor?.Name})",
+                    b.DrawWordWrappedText($"(Say something to {interlocutor?.Name})",
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenWaiting:
-                    Extensions.DrawWordWrappedText(b, GetSpinnerString(),
+                    b.DrawWordWrappedText(GetSpinnerString(),
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenDisplaying:
@@ -121,7 +121,7 @@ namespace StardewChatter
 
                     if (!string.IsNullOrEmpty(npcReply))
                     {
-                        Extensions.DrawWordWrappedText(b, npcReply,
+                        b.DrawWordWrappedText(npcReply,
                             NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     }
                     break;

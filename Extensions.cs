@@ -42,16 +42,19 @@ namespace StardewChatter
                 sourceRectangle: PortraitUtil.EmotionToPortraitRect(emotion), Color.White);
         }
 
-        public static void DrawWordWrappedText(SpriteBatch spriteBatch, string text, Rectangle box, SpriteFont font,
-            Color color)
+        /// <summary>
+        /// Accepts a string and splits it into multiple lines based on the width of the box
+        /// and the horizontal size of the font.
+        /// </summary>
+        static List<string> GetWordWrappedLines(this SpriteFont font, string text, int lineWidth)
         {
             var lines = new List<string>();
             var line = "";
             var words = text.Split(' ');
 
-            foreach (var word in words)
+            foreach (var word in words) // TODO: could optimize search speed w/ BST?
             {
-                if (font.MeasureString(line + word).X > box.Width)
+                if (font.MeasureString(line + word).X > lineWidth)
                 {
                     lines.Add(line);
                     line = "";
@@ -59,19 +62,33 @@ namespace StardewChatter
 
                 line += word + " ";
             }
-
             lines.Add(line);
+            return lines;
+        }
 
-            var lineHeight = font.LineSpacing;
+        public static void DrawWordWrappedText(this SpriteBatch spriteBatch, string text, Rectangle box,
+            SpriteFont font, Color color)
+        {
+            var lines = font.GetWordWrappedLines(text, box.Width);
             var y = box.Y;
-
-            foreach (var textLine in lines)
+            foreach (var line in lines)
             {
                 // spriteBatch.DrawString(font, textLine, new Vector2(box.X, y), color);
-                Utility.drawTextWithShadow(spriteBatch, textLine, font, new Vector2(box.X, y), color);
-                Utility.drawBoldText(spriteBatch, textLine, font, new Vector2(box.X, y), color);
-                y += lineHeight;
+                Utility.drawTextWithShadow(spriteBatch, line, font, new Vector2(box.X, y), color);
+                Utility.drawBoldText(spriteBatch, line, font, new Vector2(box.X, y), color);
+                y += font.LineSpacing;
             }
+        }
+        
+        /// <returns>X and Y coords at end of the last character of a string,
+        /// given a font and text field extents.</returns>
+        static Vector2 GetWordWrappedEnd(this SpriteFont font, string text, Rectangle box)
+        {
+            var lines = font.GetWordWrappedLines(text, box.Width);
+            var x = lines.Count == 0 ? 0 : font.MeasureString(lines[lines.Count - 1]).X;
+            var lineCount = lines.Count > 0 ? lines.Count : 1;
+            var y = lineCount * font.LineSpacing;
+            return new Vector2(x, y);
         }
     }
 }
