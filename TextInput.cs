@@ -104,7 +104,9 @@ namespace StardewChatter
             if (Content.Length >= MAX_CHAR_COUNT) return;
             if (Content.Length + text.Length > MAX_CHAR_COUNT)
             {
-                text = text.Substring(0, MAX_CHAR_COUNT - Content.Length);
+                var capacity = MAX_CHAR_COUNT - Content.Length;
+                if (capacity < 0) return;
+                text = text.Substring(0, capacity);
             }
             Content += text;
         }
