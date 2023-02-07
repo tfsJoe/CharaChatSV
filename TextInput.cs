@@ -1,5 +1,7 @@
 ﻿
 
+using System;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -89,12 +91,30 @@ namespace StardewChatter
             #endif
             
             spriteBatch.DrawAndTruncateWordWrappedText(ref content, rect, Font, TextColor);
-            Content = content;  // Sanitization. Necessary because of "ref"
+            Content = content;  // Sanitization. Necessary because ref doesn't work with setter.
+
+            if ((DateTime.Now.Millisecond / 250) % 2 == 0)
+            {
+                DrawCaret(spriteBatch);
+            }
+        }
+
+        void DrawCaret(SpriteBatch spriteBatch)
+        {
+            var textToCaret = Content.Substring(0, CaretIndex);
+            var pos = Font.GetWordWrappedEnd(textToCaret, rect);
+            pos.X += rect.X;
+            pos.Y += rect.Y;
+            var caretRect = new Rectangle(pos.X, pos.Y, 2, Font.LineSpacing);
+            spriteBatch.Draw(Game1.fadeToBlackRect, caretRect, Color.Chocolate * 0.75f);
         }
 
         void IKeyboardSubscriber.RecieveTextInput(char inputChar)
         {
-            Content += inputChar;
+            string pre = Content.Substring(0, CaretIndex);
+            string post = Content.Substring(CaretIndex, Content.Length - CaretIndex);
+            Content = string.Join("", pre, inputChar, post);
+            ++CaretIndex;
             // ModEntry.Log(Content);
         }
 
@@ -108,14 +128,18 @@ namespace StardewChatter
                 if (capacity < 0) return;
                 text = text.Substring(0, capacity);
             }
-            Content += text;
+
+            string pre = Content.Substring(0, CaretIndex);
+            string post = Content.Substring(CaretIndex, Content.Length - CaretIndex);
+            Content = string.Join("", pre, text, post);
+            CaretIndex += text.Length;
         }
 
         void IKeyboardSubscriber.RecieveCommandInput(char command)
         {
             if (command == '\b' && Content.Length > 0)
             {
-                Content = Content.Substring(0, Content.Length - 1); // TODO acct for caret
+                Content = Content.Substring(0, Content.Length - 1);
             }
             else
             {

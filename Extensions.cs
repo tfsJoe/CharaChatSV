@@ -99,13 +99,13 @@ namespace StardewChatter
         
         /// <returns>X and Y coords at end of the last character of a string,
         /// given a font and text field extents.</returns>
-        static Vector2 GetWordWrappedEnd(this SpriteFont font, string text, Rectangle box)
+        public static Point GetWordWrappedEnd(this SpriteFont font, string text, Rectangle box)
         {
             var lines = font.GetWordWrappedLines(text, box.Width);
-            var x = lines.Count == 0 ? 0 : font.MeasureString(lines[lines.Count - 1]).X;
+            var x = lines.Count == 0 ? 0 : (int)font.MeasureString(lines[lines.Count - 1]).X;
             var lineCount = lines.Count > 0 ? lines.Count : 1;
             var y = lineCount * font.LineSpacing;
-            return new Vector2(x, y);
+            return new Point(x, y);
         }
     }
 }
