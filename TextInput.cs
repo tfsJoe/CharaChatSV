@@ -16,8 +16,32 @@ namespace StardewChatter
         private IKeyboardSubscriber previousSubscriber;
         
         private const int MAX_CHAR_COUNT = 300;
-        public string Content { get; private set; } = "";
+
+        private string content = "";
+        public string Content
+        {
+            get
+            {
+                if (content == null) content = "";
+                else if (content.Length >= MAX_CHAR_COUNT)
+                {
+                    content = content.Substring(0, MAX_CHAR_COUNT);
+                }
+                return content;
+            }
+            private set
+            {
+                if (value == null) content = "";
+                else if (value.Length > MAX_CHAR_COUNT)
+                {
+                    content = value.Substring(0, MAX_CHAR_COUNT);
+                }
+                else content = value;
+            }
+        }
         private static SpriteFont Font => Game1.dialogueFont;
+        private static Color TextColor => Color.Sienna;
+        
         private int caretIndex = 0;
         private int CaretIndex
         {
@@ -64,13 +88,12 @@ namespace StardewChatter
             spriteBatch.Draw(Game1.fadeToBlackRect, rect, Color.MediumOrchid * 0.15f);
             #endif
             
-            spriteBatch.DrawString(Font, Content, new Vector2(rect.X, rect.Y), Color.Black);
-            
+            spriteBatch.DrawAndTruncateWordWrappedText(ref content, rect, Font, TextColor);
+            Content = content;  // Sanitization. Necessary because of "ref"
         }
 
         void IKeyboardSubscriber.RecieveTextInput(char inputChar)
         {
-            if (Content.Length >= MAX_CHAR_COUNT) return;
             Content += inputChar;
             // ModEntry.Log(Content);
         }

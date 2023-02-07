@@ -66,8 +66,8 @@ namespace StardewChatter
             return lines;
         }
 
-        public static void DrawWordWrappedText(this SpriteBatch spriteBatch, string text, Rectangle box,
-            SpriteFont font, Color color)
+        public static void DrawWordWrappedText(this SpriteBatch spriteBatch, string text,
+            Rectangle box, SpriteFont font, Color color)
         {
             var lines = font.GetWordWrappedLines(text, box.Width);
             var y = box.Y;
@@ -75,8 +75,25 @@ namespace StardewChatter
             {
                 // spriteBatch.DrawString(font, textLine, new Vector2(box.X, y), color);
                 Utility.drawTextWithShadow(spriteBatch, line, font, new Vector2(box.X, y), color);
-                Utility.drawBoldText(spriteBatch, line, font, new Vector2(box.X, y), color);
                 y += font.LineSpacing;
+            }
+        }
+
+        public static void DrawAndTruncateWordWrappedText(this SpriteBatch spriteBatch, ref string text, 
+            Rectangle box, SpriteFont font, Color color)
+        {
+            var lines = font.GetWordWrappedLines(text, box.Width);
+            var y = box.Y;
+            for (var i = 0; i < lines.Count; ++i)
+            {
+                y += font.LineSpacing;
+                if (y > box.Height + box.Y && i > 0)
+                {
+                    ModEntry.Log($"Lines y got to {y} but box height was {box.Height}");
+                    text = string.Join(' ', lines.GetRange(0, i));
+                    return;
+                }
+                Utility.drawTextWithShadow(spriteBatch, lines[i], font, new Vector2(box.X, y), color);
             }
         }
         
