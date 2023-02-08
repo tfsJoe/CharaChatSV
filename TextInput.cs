@@ -75,6 +75,8 @@ namespace StardewChatter
             if (Game1.keyboardDispatcher.Subscriber == this) return;
             previousSubscriber = Game1.keyboardDispatcher.Subscriber;
             Game1.keyboardDispatcher.Subscriber = this;
+            events.Input.ButtonPressed -= OnButtonPressed;
+            events.Input.ButtonPressed += OnButtonPressed;
             // ModEntry.Log($"Keyboard Dispatcher now: {Game1.keyboardDispatcher.Subscriber.GetType().FullName}.");
         }
         
@@ -82,12 +84,13 @@ namespace StardewChatter
         {
             // ModEntry.Log($"Restoring previous keyboard dispatcher subscriber: {previousSubscriber?.GetType().FullName}");
             Game1.keyboardDispatcher.Subscriber = previousSubscriber;
+            events.Input.ButtonPressed -= OnButtonPressed;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             #if DEBUG
-            spriteBatch.Draw(Game1.fadeToBlackRect, rect, Color.MediumOrchid * 0.15f);
+            // spriteBatch.Draw(Game1.fadeToBlackRect, rect, Color.MediumOrchid * 0.15f);
             #endif
             
             spriteBatch.DrawAndTruncateWordWrappedText(ref content, rect, Font, TextColor);
@@ -103,7 +106,7 @@ namespace StardewChatter
         {
             var textToCaret = Content.Substring(0, CaretIndex);
             var pos = Font.GetWordWrappedEnd(textToCaret, rect);
-            pos.X += rect.X;
+            pos.X += rect.X - 18;
             pos.Y += rect.Y;
             var caretRect = new Rectangle(pos.X, pos.Y, 2, Font.LineSpacing);
             spriteBatch.Draw(Game1.fadeToBlackRect, caretRect, Color.Chocolate * 0.75f);
@@ -137,9 +140,11 @@ namespace StardewChatter
 
         void IKeyboardSubscriber.RecieveCommandInput(char command)
         {
-            if (command == '\b' && Content.Length > 0)
+            if (command == '\b' && CaretIndex > 0 && Content.Length > 0)
             {
-                Content = Content.Substring(0, Content.Length - 1);
+                Content = Content.Substring(0, CaretIndex - 1) +
+                          Content.Substring(CaretIndex, Content.Length - CaretIndex);
+                if (CaretIndex < Content.Length) --CaretIndex;
             }
             else
             {
@@ -150,6 +155,21 @@ namespace StardewChatter
         void IKeyboardSubscriber.RecieveSpecialInput(Keys key)
         {
             ModEntry.Log($"Received key: {key.ToString()}");
+        }
+
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case SButton.Left:
+                    --CaretIndex;
+                    break;
+                case SButton.Right:
+                    ++CaretIndex;
+                    break;
+                default:
+                    break;
+            }
         }
 
         bool IKeyboardSubscriber.Selected
