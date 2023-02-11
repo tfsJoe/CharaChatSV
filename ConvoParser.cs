@@ -13,7 +13,7 @@ namespace StardewChatter
         {
             if (npc == null) return null;
             string prompt = File.ReadAllText(TemplatePath);
-            var friendship = Game1.player.friendshipData[npc.Name];
+
             string ageGroup = npc.Age switch
             {
                 0 => "Age: adult, ",
@@ -40,6 +40,16 @@ namespace StardewChatter
                 1 => "negative",
                 _ => ""
             };
+            
+            bool gotFriendship = Game1.player.friendshipData.TryGetValue(npc.Name, out var friendship);
+            string relationshipStatus = !gotFriendship ? "strangers" :
+                friendship.IsMarried() ? "married" :
+                friendship.IsDating() ? "dating" :
+                friendship.IsDivorced() ? "divorced" :
+                friendship.IsRoommate() ? "roomates" :
+                friendship.IsEngaged() ? "engaged" :
+                Game1.player.getChildren().FirstOrDefault(c => c.Name == npc.Name) != null ? "that @npc-name is @player-name's child" :
+                "platonic";
 
             prompt = prompt
                 .Replace("@npc-subj-pron-cap", npc.Gender == 0 ? "He" : "She")
@@ -55,13 +65,7 @@ namespace StardewChatter
                 .Replace("@optimism", optimism)
                 .Replace("@love-interest", !string.IsNullOrEmpty(npc.loveInterest) && npc.loveInterest != "null"
                     ? $". If it comes up, @npc-name's love interest is {npc.loveInterest}" : "")
-                .Replace("@relationship-status", friendship.IsMarried() ? "married" :
-                        friendship.IsDating() ? "dating" :
-                        friendship.IsDivorced() ? "divorced" :
-                        friendship.IsRoommate() ? "roomates" :
-                        friendship.IsEngaged() ? "engaged" :
-                        Game1.player.getChildren().FirstOrDefault(c => c.Name == npc.Name) != null ? "that @npc-name is @player-name's child" :
-                        "platonic")
+                .Replace("@relationship-status", relationshipStatus)
                 .Replace("@npc-name", npc.Name)
                 .Replace("@player-name", Game1.player.Name);
             return prompt;

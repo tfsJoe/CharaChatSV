@@ -41,24 +41,15 @@ namespace StardewChatter
             if (!Context.IsWorldReady || !Context.IsPlayerFree || Game1.isTimePaused)
                 return;
 
-            
-            #if DEBUG
+#if DEBUG
             switch (e.Button)
             {
                 case SButton.H:
                     Log("Debug: talk to Haley");
-                    convoWindow.Converse(Game1.getCharacterFromName("Haley"), "Tell me a cat fact, Haley.");
+                    convoWindow.StartConversation(Game1.getCharacterFromName("Haley"));
                     return;
-                case SButton.L:
-                    Log("Debug: talk to Lewis");
-                    convoWindow.Converse(Game1.getCharacterFromName("Lewis"));
-                    break;
-                case SButton.P:
-                    Log("Simulating hanging web response");
-                    convoWindow.SimulateWebHang();
-                    break;
             }
-            #endif
+#endif
 
             if (e.Button != SButton.MouseRight && e.Button != SButton.MouseLeft) return;
 
@@ -101,8 +92,9 @@ namespace StardewChatter
         
         public static void Log(string message)
         {
-            if (monitor == null) return;
-            monitor.Log(message, LogLevel.Debug);
+#if DEBUG
+            monitor?.Log(message, LogLevel.Debug);
+#endif
         }
         #endregion
     }
