@@ -157,11 +157,11 @@ namespace StardewChatter
 
         string GetSpinnerString()
         {
-            int dots = ((DateTime.Now.Millisecond / 200) % 5) + 1;
+            int dots = ((DateTime.Now.Millisecond / 200) % 5);
             switch (dots)
             {
-                case 1: return ".";
-                case 2: return "..";
+                case 0: return ".";
+                case 1: return "..";
                 default:
                     return "...";
             }
