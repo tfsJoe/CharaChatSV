@@ -58,8 +58,8 @@ namespace StardewChatter
             initialize(x, yTop + yBottom, w, hTop + hBottom, true);
             textInput = new TextInput(PlayerTextRect);
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
-            clearButton = new ErsatzButton(textBoxTexture, "Clear", ClearButtonRect, () => ModEntry.Log("Clear"));
-            submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, () => ModEntry.Log("Submit"));
+            clearButton = new ErsatzButton(textBoxTexture, "Clear", ClearButtonRect, textInput.Clear);
+            submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, textInput.Submit);
         }
 
         /// <summary>
@@ -141,14 +141,9 @@ namespace StardewChatter
                     break;
             }
             
-            //buttons
-            
+            // Buttons
             clearButton.Draw(b);
             submitButton.Draw(b);
-#if DEBUG
-            b.Draw(Game1.fadeToBlackRect, ClearButtonRect, Color.Purple * .15f);
-            b.Draw(Game1.fadeToBlackRect, SubmitButtonRect, Color.Lime * .15f);
-#endif
             
             drawMouse(b);
         }

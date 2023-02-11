@@ -173,6 +173,17 @@ namespace StardewChatter
             }
         }
 
+        public void Clear()
+        {
+            Content = "";
+            CaretIndex = 0;
+        }
+
+        public void Submit()
+        {
+            ModEntry.Log($"Submitting content:\n{Content}");
+        }
+
         bool IKeyboardSubscriber.Selected
         {
             get => selected;
