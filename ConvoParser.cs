@@ -7,7 +7,7 @@ namespace StardewChatter
 {
     public static class ConvoParser
     {
-        static string TemplatePath => Path.Combine(ModEntry.ModDirectory, "promptTemplate.txt");
+        private static string TemplatePath => Path.Combine(ModEntry.ModDirectory, "promptTemplate.txt");
 
         public static string ParseTemplate(NPC npc)
         {
