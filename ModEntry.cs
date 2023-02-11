@@ -14,6 +14,12 @@ namespace StardewChatter
     internal sealed class ModEntry : Mod
     {
         private static IMonitor monitor;
+
+        public static string ModDirectory
+        {
+            get;
+            private set;
+        }
         private static NPC interlocutor = null;
         private ConvoWindow convoWindow;
 
@@ -21,6 +27,7 @@ namespace StardewChatter
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            ModDirectory = helper.DirectoryPath;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             monitor ??= Monitor;
             convoWindow = new ConvoWindow(helper);
@@ -53,10 +60,11 @@ namespace StardewChatter
             }
             #endif
 
-            if (e.Button != SButton.MouseRight) return;
+            if (e.Button != SButton.MouseRight && e.Button != SButton.MouseLeft) return;
 
             interlocutor = GetClickedNpcWhoCanChat();
             if (interlocutor == null) return;
+            ModEntry.Log(ConvoParser.ParseTemplate(interlocutor));
         }
 
         private NPC GetClickedNpcWhoCanChat()
