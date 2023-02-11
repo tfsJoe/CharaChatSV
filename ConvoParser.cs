@@ -54,7 +54,7 @@ namespace StardewChatter
                 .Replace("@social-anxiety", socialAnxiety)
                 .Replace("@optimism", optimism)
                 .Replace("@love-interest", !string.IsNullOrEmpty(npc.loveInterest) && npc.loveInterest != "null"
-                    ? $". If it comes up, her love interest is {npc.loveInterest}" : "")
+                    ? $". If it comes up, @npc-name's love interest is {npc.loveInterest}" : "")
                 .Replace("@relationship-status", friendship.IsMarried() ? "married" :
                         friendship.IsDating() ? "dating" :
                         friendship.IsDivorced() ? "divorced" :
