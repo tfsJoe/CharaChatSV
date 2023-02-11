@@ -14,8 +14,7 @@ namespace StardewChatter
         private readonly IModHelper helper; //SMAPI helper, not Stardew-native
         private int x, yTop, yBottom, w, hTop, hBottom;
         private readonly TextInput textInput;
-        private readonly ClickableTextureComponent clearButton, submitButton;
-        private readonly Texture2D textBoxTexture;
+        private readonly ErsatzButton clearButton, submitButton;
 
         private NPC interlocutor;
         private string playerPrompt = "";   // TODO: print when appropriate
@@ -46,9 +45,9 @@ namespace StardewChatter
         private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yBottom + 64,
             width: w - 179, height: hBottom - 128);
         private Rectangle ClearButtonRect => new Rectangle(PlayerTextRect.X + PlayerTextRect.Width,
-            PlayerTextRect.Y, NpcTextRect.Width - PlayerTextRect.Width, PlayerTextRect.Height / 2);
-        private Rectangle SubmitButtonRect => new Rectangle(ClearButtonRect.X, ClearButtonRect.Width,
-            ClearButtonRect.Y + ClearButtonRect.Height, ClearButtonRect.Height);
+            PlayerTextRect.Y + 128, 192, 48);
+        private Rectangle SubmitButtonRect => new Rectangle(ClearButtonRect.X, ClearButtonRect.Y + 54,
+            192, 48);
         private static Color NpcTextColor => new Color(86, 22, 12, 255);
         
 
@@ -58,11 +57,9 @@ namespace StardewChatter
             Recenter();
             initialize(x, yTop + yBottom, w, hTop + hBottom, true);
             textInput = new TextInput(PlayerTextRect);
-            textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
-            clearButton = new ClickableTextureComponent("OK", 
-                ClearButtonRect,
-                "", "Clear your message?", textBoxTexture, 
-                new Rectangle(0, 0, 192, 48), 1f);
+            var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
+            clearButton = new ErsatzButton(textBoxTexture, "Clear", ClearButtonRect, () => ModEntry.Log("Clear"));
+            submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, () => ModEntry.Log("Submit"));
         }
 
         /// <summary>
@@ -112,9 +109,7 @@ namespace StardewChatter
             // Player input portion
             Game1.drawDialogueBox(x, yBottom, w, hBottom, false, true);
             textInput.Draw(b);
-            clearButton.draw(b);
-            
-            
+
             // NPC response portion
 #if DEBUG
             b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
@@ -146,7 +141,23 @@ namespace StardewChatter
                     break;
             }
             
+            //buttons
+            
+            clearButton.Draw(b);
+            submitButton.Draw(b);
+#if DEBUG
+            b.Draw(Game1.fadeToBlackRect, ClearButtonRect, Color.Purple * .15f);
+            b.Draw(Game1.fadeToBlackRect, SubmitButtonRect, Color.Lime * .15f);
+#endif
+            
             drawMouse(b);
+        }
+
+        public override void receiveLeftClick(int x, int y, bool playSound = true)
+        {
+            base.receiveLeftClick(x, y, playSound);
+            clearButton.DetectClick(x, y);
+            submitButton.DetectClick(x, y);
         }
 
         string GetSpinnerString()
@@ -173,11 +184,13 @@ namespace StardewChatter
         {
             float scale = 1f / Game1.options.uiScale;
             w = (int)(Game1.viewport.Width * scale * 0.9f);
-            hTop = Game1.viewport.Height / 2;
+            hTop = (int)(Game1.viewport.Height * scale) / 2;
             hBottom = Game1.viewport.Height / 2;
             x = (Game1.viewport.Width - w) / 2;
             yTop = 0;
             yBottom = hTop;
+            if (clearButton != null) clearButton.rect = ClearButtonRect;
+            if (submitButton != null) submitButton.rect = SubmitButtonRect;
         }
     }
 
