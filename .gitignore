@@ -397,4 +397,7 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Project-specific
 XNBExtract
+APIKeys
+apiKeys-secret.json

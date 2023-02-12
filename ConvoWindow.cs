@@ -17,8 +17,9 @@ namespace StardewChatter
         private readonly ErsatzButton clearButton, submitButton;
 
         private NPC interlocutor;
-        private string playerPrompt = "";   // TODO: print when appropriate
+        private string chatLog = "";
         private string npcReply = "";
+        private Gpt3Fetcher chatApi;
 
         private Status status = Status.Closed;
         public Status Status
@@ -30,7 +31,7 @@ namespace StardewChatter
                 if (value == Status.Closed)
                 {
                     // ModEntry.Log("Closing ConvoWindow.");
-                    textInput?.UnsubscribeAll(helper.Events);
+                    Reset();
                     Game1.activeClickableMenu = null;
                 }
                 else
@@ -59,7 +60,8 @@ namespace StardewChatter
             textInput = new TextInput(PlayerTextRect);
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear", ClearButtonRect, textInput.Clear);
-            submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, textInput.Submit);
+            submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, SubmitContent);
+            chatApi = new Gpt3Fetcher(helper);
         }
 
         /// <summary>
@@ -68,35 +70,34 @@ namespace StardewChatter
         /// </summary>
         /// <param name="npc">To which NPC is the player speaking?</param>
         /// <param name="prompt">What has the player said to this NPC?</param>
-        public void Converse(NPC npc, string prompt = "")
+        public void StartConversation(NPC npc)
         {
             if (npc == null)
             {
-                // ModEntry.Log("Tried to enter conversation with nobody.");
+                ModEntry.Log("Tried to start conversation with nobody.");
                 Status = Status.Closed;
                 return;
             }
             interlocutor = npc;
-            Status = string.IsNullOrEmpty(prompt) ? Status.OpenInit : Status.OpenWaiting;
-            playerPrompt = prompt;
-            if (Status == Status.OpenWaiting)
-            {
-                UpdateOnReply(prompt);
-            }
+            Status = Status.OpenInit;
+            chatLog = ConvoParser.ParseTemplate(npc);
             Game1.activeClickableMenu = this;
         }
 
-        private async void UpdateOnReply(string prompt)
-        {
-            npcReply = await CatFactFetcher.GetCatFact();  // TODO: Use prompt to get actual reply eventually
-            if (Status == Status.Closed) return;
-            Status = Status.OpenDisplaying;
-        }
-
-        public void SimulateWebHang()
+        private void SubmitContent()
         {
             Status = Status.OpenWaiting;
-            Game1.activeClickableMenu = this;
+            UpdateOnReply(textInput.Content);
+        }
+
+        private async void UpdateOnReply(string nextInput)
+        {
+            chatLog += $"\n@human: {nextInput}\n@ai:";
+
+            npcReply = await chatApi.Chat(chatLog);
+            chatLog += npcReply;
+            if (Status == Status.Closed) return;
+            Status = Status.OpenDisplaying;
         }
         
         public override void draw(SpriteBatch b)
@@ -155,15 +156,16 @@ namespace StardewChatter
             submitButton.DetectClick(x, y);
         }
 
-        string GetSpinnerString()
+        public override void receiveKeyPress(Keys key)
         {
-            int dots = ((DateTime.Now.Millisecond / 200) % 5) + 1;
-            switch (dots)
+            switch (key)
             {
-                case 1: return ".";
-                case 2: return "..";
+                case Keys.Escape:
+                    ModEntry.Log("Closing ConvoWindow");
+                    Status = Status.Closed;
+                    break;
                 default:
-                    return "...";
+                    return;
             }
         }
 
@@ -171,8 +173,27 @@ namespace StardewChatter
         {
             // ModEntry.Log("Cleaning up ConvoWindow");
             status = Status.Closed;
-            textInput.UnsubscribeAll(helper.Events);
+            Reset();
             base.cleanupBeforeExit();
+        }
+
+        private void Reset()
+        {
+            textInput?.UnsubscribeAll(helper.Events);
+            textInput?.Clear();
+            chatLog = "";
+        }
+
+        private static string GetSpinnerString()
+        {
+            int dots = ((DateTime.Now.Millisecond / 200) % 5);
+            switch (dots)
+            {
+                case 0: return ".";
+                case 1: return "..";
+                default:
+                    return "...";
+            }
         }
 
         private void Recenter()

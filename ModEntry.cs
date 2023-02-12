@@ -14,6 +14,12 @@ namespace StardewChatter
     internal sealed class ModEntry : Mod
     {
         private static IMonitor monitor;
+
+        public static string ModDirectory
+        {
+            get;
+            private set;
+        }
         private static NPC interlocutor = null;
         private ConvoWindow convoWindow;
 
@@ -21,6 +27,7 @@ namespace StardewChatter
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            ModDirectory = helper.DirectoryPath;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             monitor ??= Monitor;
             convoWindow = new ConvoWindow(helper);
@@ -34,29 +41,21 @@ namespace StardewChatter
             if (!Context.IsWorldReady || !Context.IsPlayerFree || Game1.isTimePaused)
                 return;
 
-            
-            #if DEBUG
+#if DEBUG
             switch (e.Button)
             {
                 case SButton.H:
                     Log("Debug: talk to Haley");
-                    convoWindow.Converse(Game1.getCharacterFromName("Haley"), "Tell me a cat fact, Haley.");
+                    convoWindow.StartConversation(Game1.getCharacterFromName("Haley"));
                     return;
-                case SButton.L:
-                    Log("Debug: talk to Lewis");
-                    convoWindow.Converse(Game1.getCharacterFromName("Lewis"));
-                    break;
-                case SButton.P:
-                    Log("Simulating hanging web response");
-                    convoWindow.SimulateWebHang();
-                    break;
             }
-            #endif
+#endif
 
-            if (e.Button != SButton.MouseRight) return;
+            if (e.Button != SButton.MouseRight && e.Button != SButton.MouseLeft) return;
 
             interlocutor = GetClickedNpcWhoCanChat();
             if (interlocutor == null) return;
+            ModEntry.Log(ConvoParser.ParseTemplate(interlocutor));
         }
 
         private NPC GetClickedNpcWhoCanChat()
@@ -93,8 +92,9 @@ namespace StardewChatter
         
         public static void Log(string message)
         {
-            if (monitor == null) return;
-            monitor.Log(message, LogLevel.Debug);
+#if DEBUG
+            monitor?.Log(message, LogLevel.Debug);
+#endif
         }
         #endregion
     }

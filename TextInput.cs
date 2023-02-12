@@ -1,6 +1,7 @@
 ﻿
 
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,6 +20,7 @@ namespace StardewChatter
         private IKeyboardSubscriber previousSubscriber;
         
         private const int MAX_CHAR_COUNT = 300;
+        private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@'};
 
         private string content = "";
         public string Content
@@ -115,6 +117,7 @@ namespace StardewChatter
 
         void IKeyboardSubscriber.RecieveTextInput(char inputChar)
         {
+            if (illegalChars.Any(illegalChar => inputChar == illegalChar)) return;
             string pre = Content.Substring(0, CaretIndex);
             string post = Content.Substring(CaretIndex, Content.Length - CaretIndex);
             Content = string.Join("", pre, inputChar, post);
@@ -125,6 +128,10 @@ namespace StardewChatter
         void IKeyboardSubscriber.RecieveTextInput(string text)
         {
             // ModEntry.Log($"Received string: {text}");
+            foreach (var illegalChar in illegalChars)
+            {
+                text = text.Replace(illegalChar.ToString(), "");
+            }
             if (Content.Length >= MAX_CHAR_COUNT) return;
             if (Content.Length + text.Length > MAX_CHAR_COUNT)
             {
@@ -177,11 +184,6 @@ namespace StardewChatter
         {
             Content = "";
             CaretIndex = 0;
-        }
-
-        public void Submit()
-        {
-            ModEntry.Log($"Submitting content:\n{Content}");
         }
 
         bool IKeyboardSubscriber.Selected
