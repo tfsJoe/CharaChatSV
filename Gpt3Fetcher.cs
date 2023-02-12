@@ -15,8 +15,10 @@ namespace StardewChatter
 
             if (keyManager.openAI.Contains(' '))
             {
-                throw new InvalidDataException("Open AI API key has not been correctly entered in apiKeys.json.");
+                throw new InvalidDataException("OpenAI API key has not been correctly entered in apiKeys.json. Please set this value");
             }
+            
+            ModEntry.Log(keyManager.openAI);
         }
     }
 }

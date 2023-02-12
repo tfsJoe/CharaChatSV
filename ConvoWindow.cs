@@ -19,6 +19,7 @@ namespace StardewChatter
         private NPC interlocutor;
         private string chatLog = "";
         private string npcReply = "";
+        private Gpt3Fetcher chatApi;
 
         private Status status = Status.Closed;
         public Status Status
@@ -60,6 +61,7 @@ namespace StardewChatter
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, SubmitContent);
+            chatApi = new Gpt3Fetcher(helper);
         }
 
         /// <summary>
@@ -91,6 +93,7 @@ namespace StardewChatter
         private async void UpdateOnReply(string nextInput)
         {
             chatLog += $"\nHuman: {nextInput}\nAI:";
+            
             npcReply = await CatFactFetcher.GetCatFact();  // TODO: Use prompt to get actual reply eventually
             chatLog += npcReply;
             if (Status == Status.Closed) return;

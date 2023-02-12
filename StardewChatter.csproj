@@ -14,6 +14,10 @@
     </EmbeddedResource>
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="APIKeys" />
+  </ItemGroup>
+  
   <!-- Copies a dummy version of the API key for release builds. Use your real  -->
   <Target Name="CopyAPIKey">
     <ItemGroup Condition="'$(Configuration)' == 'Debug'">
