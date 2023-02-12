@@ -58,7 +58,7 @@ namespace StardewChatter
             this.helper = helper;
             Recenter();
             initialize(x, yTop + yBottom, w, hTop + hBottom, true);
-            textInput = new TextInput(PlayerTextRect);
+            textInput = new TextInput(PlayerTextRect, SubmitContent);
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, SubmitContent);
@@ -98,6 +98,7 @@ namespace StardewChatter
             npcReply = await chatApi.Chat(chatLog);
             chatLog += npcReply;
             curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
+            ModEntry.Log(chatLog);
             if (Status == Status.Closed) return;
             Status = Status.OpenDisplaying;
         }
@@ -184,6 +185,8 @@ namespace StardewChatter
             textInput?.UnsubscribeAll(helper.Events);
             textInput?.Clear();
             chatLog = "";
+            npcReply = "";
+            curEmotionSpriteRect = PortraitUtil.EmotionToPortraitRect(Emotion.Neutral);
         }
 
         private static string GetSpinnerString()

@@ -18,6 +18,7 @@ namespace StardewChatter
         private Rectangle rect;
         private bool selected;
         private IKeyboardSubscriber previousSubscriber;
+        private Action enterKeyAction;
         
         private const int MAX_CHAR_COUNT = 300;
         private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@'};
@@ -64,9 +65,10 @@ namespace StardewChatter
             }
         }
 
-        public TextInput(Rectangle rect)
+        public TextInput(Rectangle rect, Action enterKeyAction)
         {
             this.rect = rect;
+            this.enterKeyAction = enterKeyAction;
         }
 
         /// <summary>
@@ -153,6 +155,10 @@ namespace StardewChatter
                 Content = Content.Substring(0, CaretIndex - 1) +
                           Content.Substring(CaretIndex, Content.Length - CaretIndex);
                 if (CaretIndex < Content.Length) --CaretIndex;
+            }
+            else if (command is '\n' or '\r')
+            {
+                enterKeyAction?.Invoke();
             }
             else
             {
