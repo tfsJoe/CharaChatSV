@@ -92,9 +92,9 @@ namespace StardewChatter
 
         private async void UpdateOnReply(string nextInput)
         {
-            chatLog += $"\nHuman: {nextInput}\nAI:";
-            
-            npcReply = await CatFactFetcher.GetCatFact();  // TODO: Use prompt to get actual reply eventually
+            chatLog += $"\n@human: {nextInput}\n@ai:";
+
+            npcReply = await chatApi.Chat(chatLog);
             chatLog += npcReply;
             if (Status == Status.Closed) return;
             Status = Status.OpenDisplaying;

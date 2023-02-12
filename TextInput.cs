@@ -20,7 +20,7 @@ namespace StardewChatter
         private IKeyboardSubscriber previousSubscriber;
         
         private const int MAX_CHAR_COUNT = 300;
-        private static readonly char[] illegalChars = new[] { '\\', '\"', ':' };
+        private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@'};
 
         private string content = "";
         public string Content

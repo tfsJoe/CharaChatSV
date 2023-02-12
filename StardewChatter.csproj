@@ -7,15 +7,16 @@
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.0" />
   </ItemGroup>
   
+  <!-- Normal resources -->
   <ItemGroup>
     <None Remove="promptTemplate.txt" />
     <EmbeddedResource Include="promptTemplate.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="APIKeys" />
+    <None Remove="requestTemplate.json" />
+    <EmbeddedResource Include="requestTemplate.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   
   <!-- Copies a dummy version of the API key for release builds. Use your real  -->
