@@ -1,18 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.0" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Remove="promptTemplate.txt" />
     <EmbeddedResource Include="promptTemplate.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
+  
+  <!-- Copies a dummy version of the API key for release builds. Use your real  -->
+  <Target Name="CopyAPIKey">
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+      <APIKey Include="$(ProjectDir)\apiKeys-secret.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <DestinationRelativePath>apiKeys.json</DestinationRelativePath>
+      </APIKey>
+    </ItemGroup>
 
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+      <APIKey Include="$(ProjectDir)\apiKeys-dummy.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <DestinationRelativePath>apiKeys.json</DestinationRelativePath>
+      </APIKey>
+    </ItemGroup>
+  </Target>
 </Project>
