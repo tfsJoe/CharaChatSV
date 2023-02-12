@@ -13,7 +13,7 @@ namespace StardewChatter
 
         public static async Task<string> GetCatFact()
         {
-            if (inst == null) inst = new();
+            inst ??= new CatFactFetcher();
             var response = await inst.client.GetAsync(catFactsUrl);
 
             if (!response.IsSuccessStatusCode)

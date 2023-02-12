@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Linq;
 
 namespace StardewChatter
 {
@@ -43,7 +44,7 @@ namespace StardewChatter
 					emoString = "$l";
 					break;
 				case Emotion.Angry:
-					emoString = "$";
+					emoString = "$a";
 					break;
 				case Emotion.Neutral:
 				default:
@@ -52,6 +53,21 @@ namespace StardewChatter
 			}
 			return EmotionStringToPortraitRect(emoString);
         }
+
+		/// <summary>
+		/// Searches a string for a $-prefixed token denoting an emotion. Prioritizes more intense/unusual emotions.
+		/// Side effect: also strips all emotion tokens out of the input string.
+		/// </summary>
+		/// <returns>The Rectangle representing the emotion's coordinates in the character spritesheets.</returns>
+		public static Rectangle EmotionPortraitFromText(ref string text)
+		{
+			// Tokens are prioritized in case multiple are found. Unique is not used here.
+			var tokens = new string[] { "$a", "$s", "$l", "$h", "$k" };
+			var foundToken = tokens.FirstOrDefault(text.Contains);
+			if (string.IsNullOrEmpty(foundToken)) foundToken = "$k";
+			foreach (var token in tokens) text = text.Replace(token, "");
+			return EmotionStringToPortraitRect(foundToken);
+		}
     }
 
     public enum Emotion

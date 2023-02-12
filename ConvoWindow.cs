@@ -17,6 +17,7 @@ namespace StardewChatter
         private readonly ErsatzButton clearButton, submitButton;
 
         private NPC interlocutor;
+        private Rectangle curEmotionSpriteRect;
         private string chatLog = "";
         private string npcReply = "";
         private Gpt3Fetcher chatApi;
@@ -96,6 +97,7 @@ namespace StardewChatter
 
             npcReply = await chatApi.Chat(chatLog);
             chatLog += npcReply;
+            curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
             if (Status == Status.Closed) return;
             Status = Status.OpenDisplaying;
         }
@@ -128,7 +130,7 @@ namespace StardewChatter
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenDisplaying:
-                    interlocutor?.DrawPortrait(b);
+                    interlocutor?.DrawPortrait(b, curEmotionSpriteRect);
 
                     if (!string.IsNullOrEmpty(npcReply))
                     {

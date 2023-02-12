@@ -41,6 +41,16 @@ namespace StardewChatter
             batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
                 sourceRectangle: PortraitUtil.EmotionToPortraitRect(emotion), Color.White);
         }
+        
+        public static void DrawPortrait(this NPC npc, SpriteBatch batch,
+            Rectangle emotionSourceRect, Rectangle? destinationRect = null)
+        {
+            destinationRect ??= new Rectangle(Game1.viewport.Width - 256, 0, 128, 128);
+            batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
+                sourceRectangle: emotionSourceRect, Color.White);
+        }
+        
+        
 
         /// <summary>
         /// Accepts a string and splits it into multiple lines based on the width of the box
