@@ -45,7 +45,6 @@ namespace StardewChatter
             switch (e.Button)
             {
                 case SButton.H:
-                    Log("Debug: talk to Haley");
                     convoWindow.StartConversation(Game1.getCharacterFromName("Haley"));
                     return;
             }

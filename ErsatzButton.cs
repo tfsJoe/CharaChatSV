@@ -14,6 +14,7 @@ namespace StardewChatter
         public string label;
         public Rectangle rect;
         public event Action onClick;
+        private static readonly Color TextColor = new(0x20, 0x10, 0x10, 0xFF);
 
         public ErsatzButton(Texture2D texture, string label, Rectangle rect, Action onClick)
         {
@@ -39,7 +40,7 @@ namespace StardewChatter
                 X = rect.X + (rect.Width - labelSize.X) / 2,
                 Y = rect.Y + (rect.Height - labelSize.Y) / 2,
             };
-            spriteBatch.DrawString(font, label, labelPos,Color.Black);
+            spriteBatch.DrawString(font, label, labelPos, TextColor);
         }
     }
 }

@@ -60,8 +60,8 @@ namespace StardewChatter
             initialize(x, yTop + yBottom, w, hTop + hBottom, true);
             textInput = new TextInput(PlayerTextRect, SubmitContent);
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
-            clearButton = new ErsatzButton(textBoxTexture, "Clear", ClearButtonRect, textInput.Clear);
-            submitButton = new ErsatzButton(textBoxTexture, "Say", SubmitButtonRect, SubmitContent);
+            clearButton = new ErsatzButton(textBoxTexture, "Clear (tab)", ClearButtonRect, textInput.Clear);
+            submitButton = new ErsatzButton(textBoxTexture, "Say (enter)", SubmitButtonRect, SubmitContent);
             chatApi = new Gpt3Fetcher(helper);
         }
 
@@ -88,6 +88,7 @@ namespace StardewChatter
         private void SubmitContent()
         {
             Status = Status.OpenWaiting;
+            textInput.LockInput();
             UpdateOnReply(textInput.Content);
         }
 
@@ -99,6 +100,7 @@ namespace StardewChatter
             chatLog += npcReply;
             curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
             ModEntry.Log(chatLog);
+            textInput.UnlockAfterDelay();
             if (Status == Status.Closed) return;
             Status = Status.OpenDisplaying;
         }

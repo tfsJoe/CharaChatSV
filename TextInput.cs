@@ -3,6 +3,8 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,6 +24,9 @@ namespace StardewChatter
         
         private const int MAX_CHAR_COUNT = 300;
         private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@'};
+        public bool clearOnNextInput;
+        private bool lockout;
+        private const int LOCKOUT_TIME = 1500;
 
         private string content = "";
         public string Content
@@ -47,6 +52,7 @@ namespace StardewChatter
         }
         private static SpriteFont Font => Game1.dialogueFont;
         private static Color TextColor => Color.Sienna;
+        private static Color LockedTextColor => TextColor * 0.6f;
         
         private int caretIndex = 0;
         private int CaretIndex
@@ -97,11 +103,12 @@ namespace StardewChatter
             #if DEBUG
             // spriteBatch.Draw(Game1.fadeToBlackRect, rect, Color.MediumOrchid * 0.15f);
             #endif
-            
-            spriteBatch.DrawAndTruncateWordWrappedText(ref content, rect, Font, TextColor);
+
+            var textColor = lockout ? LockedTextColor : TextColor;
+            spriteBatch.DrawAndTruncateWordWrappedText(ref content, rect, Font, textColor);
             Content = content;  // Sanitization. Necessary because ref doesn't work with setter.
 
-            if ((DateTime.Now.Millisecond / 250) % 2 == 0)
+            if (!lockout && (DateTime.Now.Millisecond / 250) % 2 == 0)
             {
                 DrawCaret(spriteBatch);
             }
@@ -119,6 +126,12 @@ namespace StardewChatter
 
         void IKeyboardSubscriber.RecieveTextInput(char inputChar)
         {
+            if (lockout) return;
+            if (clearOnNextInput)
+            {
+                Clear();
+                clearOnNextInput = false;
+            }
             if (illegalChars.Any(illegalChar => inputChar == illegalChar)) return;
             string pre = Content.Substring(0, CaretIndex);
             string post = Content.Substring(CaretIndex, Content.Length - CaretIndex);
@@ -129,6 +142,12 @@ namespace StardewChatter
 
         void IKeyboardSubscriber.RecieveTextInput(string text)
         {
+            if (lockout) return;
+            if (clearOnNextInput)
+            {
+                Clear();
+                clearOnNextInput = false;
+            }
             // ModEntry.Log($"Received string: {text}");
             foreach (var illegalChar in illegalChars)
             {
@@ -150,15 +169,25 @@ namespace StardewChatter
 
         void IKeyboardSubscriber.RecieveCommandInput(char command)
         {
+            if (lockout) return;
+            if (clearOnNextInput)
+            {
+                Clear();
+                clearOnNextInput = false;
+            }
             if (command == '\b' && CaretIndex > 0 && Content.Length > 0)
             {
                 Content = Content.Substring(0, CaretIndex - 1) +
                           Content.Substring(CaretIndex, Content.Length - CaretIndex);
                 if (CaretIndex < Content.Length) --CaretIndex;
             }
-            else if (command is '\n' or '\r')
+            else if (command is '\n' or '\r' && Content.Length != 0)
             {
                 enterKeyAction?.Invoke();
+            }
+            else if (command == '\t')
+            {
+                Clear();
             }
             else
             {
@@ -166,6 +195,8 @@ namespace StardewChatter
             }
         }
 
+        // So far have not seen this method called.
+        // Implement lockout and clearing if necessary.
         void IKeyboardSubscriber.RecieveSpecialInput(Keys key)
         {
             ModEntry.Log($"Received key: {key.ToString()}");
@@ -190,6 +221,15 @@ namespace StardewChatter
         {
             Content = "";
             CaretIndex = 0;
+        }
+
+        public void LockInput() => lockout = true;
+
+        public async void UnlockAfterDelay()
+        {
+            await Task.Delay(LOCKOUT_TIME);
+            lockout = false;
+            clearOnNextInput = true;
         }
 
         bool IKeyboardSubscriber.Selected
