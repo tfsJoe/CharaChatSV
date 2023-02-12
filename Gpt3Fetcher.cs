@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Force.DeepCloner;
+using Microsoft.Xna.Framework.Content;
 using StardewModdingAPI;
 
 namespace StardewChatter
@@ -29,24 +31,41 @@ namespace StardewChatter
             }
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", keyManager.openAI);
-            requestBodyTemplate = helper.Data.ReadJsonFile<Gpt3RequestBody>("apiKeys.json");
+            requestBodyTemplate = helper.Data.ReadJsonFile<Gpt3RequestBody>("requestTemplate.json");
+            if (requestBodyTemplate == null)
+            {
+                throw new InvalidDataException("Failed to load request body template");
+            }
+            if (string.IsNullOrEmpty(requestBodyTemplate.model))
+            {
+                throw new InvalidDataException($"Request body template loaded incorrectly.\n{requestBodyTemplate}");
+            }
         }
 
         public async Task<string> Chat(string prompt)
         {
-            var requestBody = requestBodyTemplate.ShallowClone();
-            requestBody.prompt = SanitizePrompt(prompt);
-            var requestPayload = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json" );
+            requestBodyTemplate.prompt = SanitizePrompt(prompt);
+            var requestPayload = new StringContent(JsonSerializer.Serialize(requestBodyTemplate), Encoding.UTF8, "application/json" );
             var request = new HttpRequestMessage(HttpMethod.Post, completionsUrl) {Content = requestPayload};
+            ModEntry.Log(request.ToString());
+            ModEntry.Log(await requestPayload.ReadAsStringAsync());
             var httpResponse = await client.SendAsync(request);
             if (!httpResponse.IsSuccessStatusCode)
             {
-                return $"Failure {httpResponse.StatusCode}: {httpResponse.ReasonPhrase}";
+                return $"(Failure! {(int)httpResponse.StatusCode} {httpResponse.StatusCode}: {httpResponse.ReasonPhrase})";
             }
             string reply;
             using (var doc = await JsonDocument.ParseAsync(await httpResponse.Content.ReadAsStreamAsync()))
             {
-                reply = doc.RootElement.GetProperty("choices").GetProperty("text").GetString();
+                try
+                {
+                    reply = doc.RootElement.GetProperty("choices")[0].GetProperty("text").GetString();
+                }
+                catch (InvalidOperationException e)
+                {
+                    ModEntry.Log(e.Message);
+                    return $"(Failure! Couldn't understand response.)";
+                }
             }
             if (string.IsNullOrEmpty(reply))
             {
