@@ -96,14 +96,14 @@ namespace StardewChatter
             var y = box.Y;
             for (var i = 0; i < lines.Count; ++i)
             {
-                y += font.LineSpacing;
                 if (y > box.Height + box.Y && i > 0)
                 {
                     ModEntry.Log($"Lines y got to {y} but box height was {box.Height}");
-                    text = string.Join(' ', lines.GetRange(0, i));
+                    text = string.Join("", lines.GetRange(0, i));
                     return;
                 }
                 Utility.drawTextWithShadow(spriteBatch, lines[i], font, new Vector2(box.X, y), color);
+                y += font.LineSpacing;
             }
         }
         

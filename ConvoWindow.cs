@@ -12,9 +12,9 @@ namespace StardewChatter
     internal class ConvoWindow : IClickableMenu
     {
         private readonly IModHelper helper; //SMAPI helper, not Stardew-native
-        private int x, yTop, yBottom, w, hTop, hBottom;
         private readonly TextInput textInput;
         private readonly ErsatzButton clearButton, submitButton;
+        private int x, yTop, yBottom, w, hTop, hBottom;
 
         private NPC interlocutor;
         private Rectangle curEmotionSpriteRect;
@@ -41,13 +41,16 @@ namespace StardewChatter
                 }
             }
         }
-        
-        private Rectangle NpcTextRect => new Rectangle(x: x + 35, y: yTop + 128,
-            width: w - 67, height: hTop - 160);
-        private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yBottom + 64,
-            width: w - 179, height: hBottom - 128);
-        private Rectangle ClearButtonRect => new Rectangle(PlayerTextRect.X + PlayerTextRect.Width,
-            PlayerTextRect.Y + 128, 192, 48);
+
+        private int HPadding => (int)((hTop + hBottom) * 0.025f);
+        private int VPadding => (int)(w * 0.025f);
+        private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yTop + 64,
+            width: w - 179, height: hTop - 160);
+        private Rectangle NpcTextRect => new Rectangle(x: x + 35, y: yBottom + 128,
+            width: w - 67, height: hBottom - 128);
+        private Rectangle NpcPortraitRect => new Rectangle(x + w - 128, hBottom, 128, 128);
+        private Rectangle ClearButtonRect => new Rectangle(PlayerTextRect.X + PlayerTextRect.Width - 128,
+            PlayerTextRect.Y + 75, 192, 48);
         private Rectangle SubmitButtonRect => new Rectangle(ClearButtonRect.X, ClearButtonRect.Y + 54,
             192, 48);
         private static Color NpcTextColor => new Color(86, 22, 12, 255);
@@ -56,7 +59,7 @@ namespace StardewChatter
         public ConvoWindow(IModHelper helper)
         {
             this.helper = helper;
-            Recenter();
+            Reflow();
             initialize(x, yTop + yBottom, w, hTop + hBottom, true);
             textInput = new TextInput(PlayerTextRect, SubmitContent);
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
@@ -108,20 +111,27 @@ namespace StardewChatter
         public override void draw(SpriteBatch b)
         {
             base.draw(b);
-            Recenter();
+            Reflow();
 
             b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.75f);
+#if DEBUG
+            b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yTop, w, hTop), Color.CadetBlue * 0.25f);
+            b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yBottom, w, hBottom), Color.Crimson * 0.25f);
+#endif
             
             // Player input portion
-            Game1.drawDialogueBox(x, yBottom, w, hBottom, false, true);
+            drawTextureBox(b, PlayerTextRect.X - HPadding, PlayerTextRect.Y - VPadding, 
+                PlayerTextRect.Width + HPadding * 2, PlayerTextRect.Height + VPadding * 2, Color.White);
             textInput.Draw(b);
-
             // NPC response portion
+            drawTextureBox(b, NpcTextRect.X - HPadding, NpcTextRect.Y - VPadding, 
+                NpcTextRect.Width + HPadding * 2, NpcTextRect.Height + VPadding * 2, Color.White);
+
 #if DEBUG
             b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
+            b.Draw(Game1.fadeToBlackRect, PlayerTextRect, Color.Lime * .45f);
 #endif
-            Game1.drawDialogueBox(x, yTop, w, hTop, true, true, "top");
-
+            
             switch (status)
             {
                 case Status.OpenInit:
@@ -133,7 +143,7 @@ namespace StardewChatter
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenDisplaying:
-                    interlocutor?.DrawPortrait(b, curEmotionSpriteRect);
+                    interlocutor?.DrawPortrait(b, curEmotionSpriteRect, NpcPortraitRect);
 
                     if (!string.IsNullOrEmpty(npcReply))
                     {
@@ -203,12 +213,11 @@ namespace StardewChatter
             }
         }
 
-        private void Recenter()
+        private void Reflow()
         {
-            float scale = 1f / Game1.options.uiScale;
-            w = (int)(Game1.viewport.Width * scale * 0.9f);
-            hTop = (int)(Game1.viewport.Height * scale) / 2;
-            hBottom = Game1.viewport.Height / 2;
+            w = (int)(Game1.viewport.Width * 0.9f);
+            hTop = Game1.viewport.Height / 2;
+            hBottom = Game1.viewport.Height - hTop;
             x = (Game1.viewport.Width - w) / 2;
             yTop = 0;
             yBottom = hTop;
