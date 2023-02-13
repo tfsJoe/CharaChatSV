@@ -74,7 +74,11 @@ namespace StardewChatter
 #endif
                 return "(No response...)";
             }
-            return Regex.Unescape(reply);
+
+            reply = Regex.Unescape(reply);
+            if (reply.Length > 1 && reply[0] == ' ')
+                reply = reply.Substring(1, reply.Length - 1);
+            return reply;
         }
 
         //TODO
