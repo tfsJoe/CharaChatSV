@@ -17,14 +17,14 @@ namespace StardewChatter
 {
     public class TextInput : IKeyboardSubscriber
     {
-        private Rectangle rect;
+        public Rectangle rect;
         private bool selected;
         private IKeyboardSubscriber previousSubscriber;
-        private Action enterKeyAction;
+        private readonly Action enterKeyAction;
         
         private const int MAX_CHAR_COUNT = 300;
-        private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@'};
-        public bool clearOnNextInput;
+        private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@', '\n', '\r', '\t'};
+        private bool clearOnNextInput;
         private bool lockout;
         private const int LOCKOUT_TIME = 1500;
 
@@ -119,9 +119,10 @@ namespace StardewChatter
             var textToCaret = Content.Substring(0, CaretIndex);
             var pos = Font.GetWordWrappedEnd(textToCaret, rect);
             pos.X += rect.X - 18;
-            pos.Y += rect.Y;
+            pos.Y += rect.Y - Font.LineSpacing;
             var caretRect = new Rectangle(pos.X, pos.Y, 2, Font.LineSpacing);
-            spriteBatch.Draw(Game1.fadeToBlackRect, caretRect, Color.Chocolate * 0.75f);
+            var color = Content.Length < MAX_CHAR_COUNT ? Color.Chocolate * 0.75f : Color.Crimson * 0.75f;
+            spriteBatch.Draw(Game1.fadeToBlackRect, caretRect, color);
         }
 
         void IKeyboardSubscriber.RecieveTextInput(char inputChar)
@@ -175,23 +176,24 @@ namespace StardewChatter
                 Clear();
                 clearOnNextInput = false;
             }
-            if (command == '\b' && CaretIndex > 0 && Content.Length > 0)
+            switch (command)
             {
-                Content = Content.Substring(0, CaretIndex - 1) +
-                          Content.Substring(CaretIndex, Content.Length - CaretIndex);
-                if (CaretIndex < Content.Length) --CaretIndex;
-            }
-            else if (command is '\n' or '\r' && Content.Length != 0)
-            {
-                enterKeyAction?.Invoke();
-            }
-            else if (command == '\t')
-            {
-                Clear();
-            }
-            else
-            {
-                ModEntry.Log($"Command: {((int)command).ToString()}");
+                case '\b' when CaretIndex > 0 && Content.Length != 0:
+                {
+                    Content = Content.Substring(0, CaretIndex - 1) +
+                              Content.Substring(CaretIndex, Content.Length - CaretIndex);
+                    if (CaretIndex < Content.Length) --CaretIndex;
+                    break;
+                }
+                case '\n' or '\r' when Content.Length != 0:
+                    enterKeyAction?.Invoke();
+                    break;
+                case '\t':
+                    Clear();
+                    break;
+                default:
+                    ModEntry.Log($"Command: {((int)command).ToString()}");
+                    break;
             }
         }
 

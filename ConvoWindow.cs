@@ -45,13 +45,14 @@ namespace StardewChatter
         private int HPadding => (int)((hTop + hBottom) * 0.025f);
         private int VPadding => (int)(w * 0.025f);
         private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yTop + 64,
-            width: w - 179, height: hTop - 160);
-        private Rectangle NpcTextRect => new Rectangle(x: x + 35, y: yBottom + 128,
-            width: w - 67, height: hBottom - 128);
-        private Rectangle NpcPortraitRect => new Rectangle(x + w - 128, hBottom, 128, 128);
-        private Rectangle ClearButtonRect => new Rectangle(PlayerTextRect.X + PlayerTextRect.Width - 128,
-            PlayerTextRect.Y + 75, 192, 48);
-        private Rectangle SubmitButtonRect => new Rectangle(ClearButtonRect.X, ClearButtonRect.Y + 54,
+            width: w - 179, height: hTop - yTop - 128); 
+        private Rectangle NpcTextRect => new Rectangle(x: x + 35, y: yBottom + 96,
+            width: w - 70, height: hBottom - 128);
+        private Rectangle NpcPortraitRect => new Rectangle(NpcTextRect.X + NpcTextRect.Width - 128,
+            yBottom - 32, 128, 128);
+        private Rectangle ClearButtonRect => new Rectangle(w / 2 - 200, 
+            PlayerTextRect.Y + PlayerTextRect.Height + 32, 192, 48);
+        private Rectangle SubmitButtonRect => new Rectangle(w /2 + 8, ClearButtonRect.Y,
             192, 48);
         private static Color NpcTextColor => new Color(86, 22, 12, 255);
         
@@ -115,8 +116,8 @@ namespace StardewChatter
 
             b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.75f);
 #if DEBUG
-            b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yTop, w, hTop), Color.CadetBlue * 0.25f);
-            b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yBottom, w, hBottom), Color.Crimson * 0.25f);
+            // b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yTop, w, hTop), Color.CadetBlue * 0.25f);
+            // b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yBottom, w, hBottom), Color.Crimson * 0.25f);
 #endif
             
             // Player input portion
@@ -128,8 +129,8 @@ namespace StardewChatter
                 NpcTextRect.Width + HPadding * 2, NpcTextRect.Height + VPadding * 2, Color.White);
 
 #if DEBUG
-            b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
-            b.Draw(Game1.fadeToBlackRect, PlayerTextRect, Color.Lime * .45f);
+            // b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
+            // b.Draw(Game1.fadeToBlackRect, PlayerTextRect, Color.Lime * .15f);
 #endif
             
             switch (status)
@@ -223,6 +224,7 @@ namespace StardewChatter
             yBottom = hTop;
             if (clearButton != null) clearButton.rect = ClearButtonRect;
             if (submitButton != null) submitButton.rect = SubmitButtonRect;
+            if (textInput != null) textInput.rect = PlayerTextRect;
         }
     }
 
