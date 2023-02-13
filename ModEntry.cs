@@ -54,7 +54,7 @@ namespace StardewChatter
 
             interlocutor = GetClickedNpcWhoCanChat();
             if (interlocutor == null) return;
-            ModEntry.Log(ConvoParser.ParseTemplate(interlocutor));
+            convoWindow.StartConversation(interlocutor);
         }
 
         private NPC GetClickedNpcWhoCanChat()
