@@ -22,6 +22,7 @@ namespace StardewChatter
         }
         private static NPC interlocutor = null;
         private ConvoWindow convoWindow;
+        private IEnumerable<SButton> convoButtons;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -31,6 +32,15 @@ namespace StardewChatter
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             monitor ??= Monitor;
             convoWindow = new ConvoWindow(helper);
+            var useButton = Game1.options.useToolButton?
+                .Select(b => b.ToSButton()).Where(b => b != SButton.MouseLeft);
+            var actionButton = Game1.options.actionButton
+                .Select(b => b.ToSButton());
+            convoButtons = useButton?.Concat(actionButton);
+            if (convoButtons == null)
+            {
+                throw new Exception("No action/use button config to use for conversation. Check input keybinds");
+            }
         }
 
         /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
@@ -49,15 +59,24 @@ namespace StardewChatter
                     return;
             }
 #endif
+            
+            if (!convoButtons.Contains(e.Button))
+            {
+                // Log($"Didn't press {string.Join(',', convoButtons)}");
+                return;
+            }
 
-            if (e.Button != SButton.MouseRight && e.Button != SButton.MouseLeft) return;
-
-            interlocutor = GetClickedNpcWhoCanChat();
-            if (interlocutor == null) return;
+            interlocutor = GetNpcWhoCanChat();
+            if (interlocutor == null)
+            {
+                // Log("Nobody can chat here");
+                return;
+            }
+            // Log($"Starting conversation with {interlocutor}");
             convoWindow.StartConversation(interlocutor);
         }
 
-        private NPC GetClickedNpcWhoCanChat()
+        private NPC GetNpcWhoCanChat()
         {
             return Game1.currentLocation.characters.FirstOrDefault(npc => npc.CanChat());
         }
@@ -83,7 +102,6 @@ namespace StardewChatter
             {
                 Monitor.Log($"{npc.Name}: ({npc.getTileLocation()}) " +
                             $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
-                            $"{(npc.IsCursorOver() ? " | Pointing" : "")}" +
                             $"{(npc.IsDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
             }
         }

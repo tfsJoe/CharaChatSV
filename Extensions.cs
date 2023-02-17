@@ -27,7 +27,7 @@ namespace StardewChatter
 
         public static bool CanChat(this NPC npc)
         {
-            return Game1.player.ActiveObject != null &&
+            return Game1.player.ActiveObject == null &&
                    npc.IsInConvoRange() && npc.IsDialogueEmpty();
         }
 
