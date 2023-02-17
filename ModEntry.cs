@@ -13,7 +13,7 @@ namespace StardewChatter
     /// <summary>The mod entry point.</summary>
     internal sealed class ModEntry : Mod
     {
-        private static IMonitor monitor;
+        public static IMonitor monitor;
 
         public static string ModDirectory
         {

@@ -17,10 +17,6 @@ namespace StardewChatter
             return sqDist <= 2;
         }
 
-        public static bool IsCursorOver(this NPC npc)
-        {
-            return npc.getTileLocation() == Game1.currentCursorTile;
-        }
 
         public static bool IsDialogueEmpty(this NPC npc)
         {
@@ -31,7 +27,8 @@ namespace StardewChatter
 
         public static bool CanChat(this NPC npc)
         {
-            return npc.IsCursorOver() && npc.IsInConvoRange() && npc.IsDialogueEmpty();
+            return Game1.player.ActiveObject != null &&
+                   npc.IsInConvoRange() && npc.IsDialogueEmpty();
         }
 
         public static void DrawPortrait(this NPC npc, SpriteBatch batch,
