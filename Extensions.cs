@@ -20,9 +20,7 @@ namespace StardewChatter
 
         public static bool IsDialogueEmpty(this NPC npc)
         {
-            if (npc.CurrentDialogue == null) return true;
-            if (npc.CurrentDialogue.Count == 0) return true;
-            return false;
+            return npc.CurrentDialogue == null || npc.CurrentDialogue.Count == 0;
         }
 
         public static bool CanChat(this NPC npc)

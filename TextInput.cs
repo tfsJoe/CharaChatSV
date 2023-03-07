@@ -223,6 +223,7 @@ namespace StardewChatter
         {
             Content = "";
             CaretIndex = 0;
+            Game1.playSound("cancel");
         }
 
         public void LockInput() => lockout = true;

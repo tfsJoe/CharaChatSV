@@ -32,6 +32,7 @@ namespace StardewChatter
                 if (value == Status.Closed)
                 {
                     // ModEntry.Log("Closing ConvoWindow.");
+                    Game1.playSound("bigDeSelect");
                     Reset();
                     Game1.activeClickableMenu = null;
                 }
@@ -41,7 +42,7 @@ namespace StardewChatter
                 }
             }
         }
-
+        
         private int HPadding => (int)((hTop + hBottom) * 0.025f);
         private int VPadding => (int)(w * 0.025f);
         private Rectangle PlayerTextRect => new Rectangle(x: x + 35, y: yTop + 64,
@@ -54,6 +55,10 @@ namespace StardewChatter
             PlayerTextRect.Y + PlayerTextRect.Height + 32, 192, 48);
         private Rectangle SubmitButtonRect => new Rectangle(w /2 + 8, ClearButtonRect.Y,
             192, 48);
+
+        private static readonly Rectangle CloseButtonSource = new Rectangle(338, 494, 11, 11);  // Examined spritesheet for vals
+        private Rectangle CloseButtonRect => new Rectangle(PlayerTextRect.Width + PlayerTextRect.X + 25 , PlayerTextRect.Y - 25,
+            CloseButtonSource.Width * 4, CloseButtonSource.Height * 4);
         private static Color NpcTextColor => new Color(86, 22, 12, 255);
         
 
@@ -87,10 +92,12 @@ namespace StardewChatter
             Status = Status.OpenInit;
             chatLog = ConvoParser.ParseTemplate(npc);
             Game1.activeClickableMenu = this;
+            Game1.playSound("bigSelect");
         }
 
         private void SubmitContent()
         {
+            Game1.playSound("select");
             Status = Status.OpenWaiting;
             textInput.LockInput();
             UpdateOnReply(textInput.Content);
@@ -161,7 +168,8 @@ namespace StardewChatter
             // Buttons
             clearButton.Draw(b);
             submitButton.Draw(b);
-            
+            b.Draw(Game1.mouseCursors, CloseButtonRect, CloseButtonSource, Color.White);
+
             drawMouse(b);
         }
 
@@ -170,6 +178,13 @@ namespace StardewChatter
             base.receiveLeftClick(x, y, playSound);
             clearButton.DetectClick(x, y);
             submitButton.DetectClick(x, y);
+            DetectCloseButtonClick(x, y);
+        }
+
+        private void DetectCloseButtonClick(int x, int y)
+        {
+            if (!CloseButtonRect.Contains(x, y)) return;
+            Status = Status.Closed;
         }
 
         public override void receiveKeyPress(Keys key)
