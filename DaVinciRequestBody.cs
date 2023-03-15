@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StardewChatter
 {
-    public sealed class Gpt3RequestBody
+    public sealed class DaVinciRequestBody
     {
         public string model { get; set; }
         public string prompt { get; set; }

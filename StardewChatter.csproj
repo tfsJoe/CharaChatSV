@@ -15,7 +15,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Remove="requestTemplate.json" />
-    <EmbeddedResource Include="requestTemplate.json">
+    <EmbeddedResource Include="davinci-requestTemplate.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

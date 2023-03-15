@@ -12,17 +12,12 @@ using StardewModdingAPI;
 
 namespace StardewChatter
 {
-    public class Gpt3Fetcher
+    public class ChatFetcher
     {
-        private readonly HttpClient client = new();
-        private readonly Gpt3RequestBody requestBodyTemplate;
-        private const string COMPLETIONS_URL = "https://api.openai.com/v1/completions";
-        // For rate limiting. See limits: https://platform.openai.com/docs/guides/rate-limits/overview
-        private const int REQUEST_WAIT_TIME = 3500;
-        private static bool waitForRateLimit;
+        protected readonly HttpClient client = new();
         private class ModVersion { public string Version { get; set; }} // Data class for parsing manifest.json
 
-        public Gpt3Fetcher(IModHelper helper)
+        public ChatFetcher(IModHelper helper)
         {
             var modVersion = helper.Data.ReadJsonFile<ModVersion>("manifest.json")?.Version;
             if (modVersion == null) modVersion = "";
@@ -39,7 +34,21 @@ namespace StardewChatter
 
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", keyManager.openAI);
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
-            requestBodyTemplate = helper.Data.ReadJsonFile<Gpt3RequestBody>("requestTemplate.json");
+        }
+    }
+    
+    public class Gpt3Fetcher : ChatFetcher
+    {
+        
+        private readonly DaVinciRequestBody requestBodyTemplate;
+        private const string COMPLETIONS_URL = "https://api.openai.com/v1/completions";
+        // For rate limiting. See limits: https://platform.openai.com/docs/guides/rate-limits/overview
+        private const int REQUEST_WAIT_TIME = 3500;
+        private static bool waitForRateLimit;
+
+        public Gpt3Fetcher(IModHelper helper) : base(helper)
+        {
+            requestBodyTemplate = helper.Data.ReadJsonFile<DaVinciRequestBody>("davinci-requestTemplate.json");
             if (requestBodyTemplate == null)
             {
                 throw new InvalidDataException("Failed to load request body template");
