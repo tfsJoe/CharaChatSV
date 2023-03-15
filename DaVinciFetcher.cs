@@ -1,52 +1,20 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Force.DeepCloner;
-using Microsoft.Xna.Framework.Content;
 using StardewModdingAPI;
 
 namespace StardewChatter
 {
-    public class ChatFetcher
+    public sealed class DaVinciFetcher : ChatFetcher
     {
-        protected readonly HttpClient client = new();
-        private class ModVersion { public string Version { get; set; }} // Data class for parsing manifest.json
-
-        public ChatFetcher(IModHelper helper)
-        {
-            var modVersion = helper.Data.ReadJsonFile<ModVersion>("manifest.json")?.Version;
-            if (modVersion == null) modVersion = "";
-            
-            var keyManager = helper.Data.ReadJsonFile<ApiKeyManager>("apiKeys.json");
-            if (keyManager == null)
-            {
-                throw new InvalidDataException("Failed to read apiKeys.json");
-            }
-            if (keyManager.openAI.Contains(' '))
-            {
-                throw new InvalidDataException("OpenAI API key has not been correctly entered in apiKeys.json. Please set this value");
-            }
-
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", keyManager.openAI);
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
-        }
-    }
-    
-    public class Gpt3Fetcher : ChatFetcher
-    {
-        
         private readonly DaVinciRequestBody requestBodyTemplate;
-        private const string COMPLETIONS_URL = "https://api.openai.com/v1/completions";
-        // For rate limiting. See limits: https://platform.openai.com/docs/guides/rate-limits/overview
-        private const int REQUEST_WAIT_TIME = 3500;
-        private static bool waitForRateLimit;
+        protected override int RequestWaitTime => 3500;
 
-        public Gpt3Fetcher(IModHelper helper) : base(helper)
+        public DaVinciFetcher(IModHelper helper) : base(helper)
         {
             requestBodyTemplate = helper.Data.ReadJsonFile<DaVinciRequestBody>("davinci-requestTemplate.json");
             if (requestBodyTemplate == null)
@@ -59,14 +27,14 @@ namespace StardewChatter
             }
         }
 
-        public async Task<string> Chat(string prompt)
+        public override async Task<string> Chat(string prompt)
         {
             requestBodyTemplate.prompt = SanitizePrompt(prompt);
             var requestPayload = new StringContent(JsonSerializer.Serialize(requestBodyTemplate), Encoding.UTF8, "application/json" );
             var request = new HttpRequestMessage(HttpMethod.Post, COMPLETIONS_URL) {Content = requestPayload};
             ModEntry.Log(request.ToString());
             ModEntry.Log(await requestPayload.ReadAsStringAsync());
-            if (waitForRateLimit) await RateLimit();
+            await RateLimit();
             waitForRateLimit = true;
             var httpResponse = await client.SendAsync(request);
             if (!httpResponse.IsSuccessStatusCode)
@@ -101,18 +69,6 @@ namespace StardewChatter
                 reply = reply.Substring(1, reply.Length - 1);
             reply = reply.Replace("@", ""); // AI sometimes uses @ before player char's name.
             return reply;
-        }
-
-        //TODO
-        private static string SanitizePrompt(string prompt)
-        {
-            return prompt;
-        }
-
-        private static async Task RateLimit()
-        {
-            if (waitForRateLimit) await Task.Delay(REQUEST_WAIT_TIME);
-            waitForRateLimit = false;
         }
     }
 }

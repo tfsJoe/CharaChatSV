@@ -20,7 +20,7 @@ namespace StardewChatter
         private Rectangle curEmotionSpriteRect;
         private string chatLog = "";
         private string npcReply = "";
-        private Gpt3Fetcher chatApi;
+        private ChatFetcher chatApi;
 
         private Status status = Status.Closed;
         public Status Status
@@ -71,7 +71,7 @@ namespace StardewChatter
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear (tab)", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say (enter)", SubmitButtonRect, SubmitContent);
-            chatApi = new Gpt3Fetcher(helper);
+            chatApi = new DaVinciFetcher(helper);
         }
 
         /// <summary>
