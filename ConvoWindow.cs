@@ -18,9 +18,8 @@ namespace StardewChatter
 
         private NPC interlocutor;
         private Rectangle curEmotionSpriteRect;
-        private string chatLog = "";
         private string npcReply = "";
-        private ChatFetcher chatApi;
+        private readonly ChatFetcher chatApi;
 
         private Status status = Status.Closed;
         public Status Status
@@ -90,7 +89,8 @@ namespace StardewChatter
             }
             interlocutor = npc;
             Status = Status.OpenInit;
-            chatLog = ConvoParser.ParseTemplate(npc);
+            chatApi.SetUpChat(npc);
+            // chatLog = ConvoParser.ParseTemplate(npc); // TODO: move to ChatFetchers
             Game1.activeClickableMenu = this;
             Game1.playSound("bigSelect");
         }
@@ -103,14 +103,11 @@ namespace StardewChatter
             UpdateOnReply(textInput.Content);
         }
 
+        // TODO: refactor. The chat log is not the entire prompt for Turbo. Responsibility for keeping chat history needs to fall on the fetcher.
         private async void UpdateOnReply(string nextInput)
         {
-            chatLog += $"\n@human: {nextInput}\n@ai:";
-
-            npcReply = await chatApi.Chat(chatLog);
-            chatLog += npcReply;
+            npcReply = await chatApi.Chat(nextInput);
             curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
-            ModEntry.Log(chatLog);
             textInput.UnlockAfterDelay();
             if (Status == Status.Closed) return;
             Status = Status.OpenDisplaying;
@@ -212,7 +209,6 @@ namespace StardewChatter
         {
             textInput?.UnsubscribeAll(helper.Events);
             textInput?.Clear();
-            chatLog = "";
             npcReply = "";
             curEmotionSpriteRect = PortraitUtil.EmotionToPortraitRect(Emotion.Neutral);
         }

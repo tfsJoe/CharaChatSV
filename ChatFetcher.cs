@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using StardewModdingAPI;
+using StardewValley;
 
 namespace StardewChatter
 {
@@ -33,7 +34,8 @@ namespace StardewChatter
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
         }
 
-        public abstract Task<string> Chat(string prompt);
+        public abstract void SetUpChat(NPC npc);
+        public abstract Task<string> Chat(string userInput);
         
         //TODO
         protected static string SanitizePrompt(string prompt)

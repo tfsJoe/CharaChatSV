@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using StardewModdingAPI;
+using StardewValley;
 
 namespace StardewChatter
 {
@@ -13,6 +14,7 @@ namespace StardewChatter
     {
         private readonly DaVinciRequestBody requestBodyTemplate;
         protected override int RequestWaitTime => 3500;
+        private string chatLog = "";
 
         public DaVinciFetcher(IModHelper helper) : base(helper)
         {
@@ -27,9 +29,16 @@ namespace StardewChatter
             }
         }
 
-        public override async Task<string> Chat(string prompt)
+        public override void SetUpChat(NPC npc)
         {
-            requestBodyTemplate.prompt = SanitizePrompt(prompt);
+            chatLog = ConvoParser.ParseTemplate(npc);
+        }
+
+        public override async Task<string> Chat(string userInput)
+        {
+            userInput = SanitizePrompt(userInput);
+            chatLog += $"\n@human: {userInput}\n@ai: ";
+            requestBodyTemplate.prompt = chatLog;
             var requestPayload = new StringContent(JsonSerializer.Serialize(requestBodyTemplate), Encoding.UTF8, "application/json" );
             var request = new HttpRequestMessage(HttpMethod.Post, COMPLETIONS_URL) {Content = requestPayload};
             ModEntry.Log(request.ToString());
@@ -68,6 +77,7 @@ namespace StardewChatter
             if (reply.Length > 1 && reply[0] == ' ')
                 reply = reply.Substring(1, reply.Length - 1);
             reply = reply.Replace("@", ""); // AI sometimes uses @ before player char's name.
+            chatLog += reply;
             return reply;
         }
     }

@@ -38,6 +38,21 @@ namespace StardewChatter
     {
         public string role { get; set; }
         public string content { get; set; }
+
+        public enum Role
+        {
+            system,
+            user,
+            assistant
+        }
+        
+        public TurboMessage() {}
+
+        public TurboMessage(Role role, string content)
+        {
+            this.role = role.ToString();
+            this.content = content;
+        }
     }
     
     public sealed class TurboRequestBody : RequestBody
