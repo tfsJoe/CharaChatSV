@@ -70,7 +70,7 @@ namespace StardewChatter
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear (tab)", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say (enter)", SubmitButtonRect, SubmitContent);
-            chatApi = new DaVinciFetcher(helper);
+            chatApi = new TurboFetcher(helper);
         }
 
         /// <summary>

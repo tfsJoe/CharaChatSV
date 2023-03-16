@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace StardewChatter
 {
@@ -57,6 +57,6 @@ namespace StardewChatter
     
     public sealed class TurboRequestBody : RequestBody
     {
-        public List<TurboMessage> messages;
+        public List<TurboMessage> messages { get; set; }
     }
 }

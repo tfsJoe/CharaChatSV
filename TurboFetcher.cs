@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
@@ -31,9 +34,9 @@ namespace StardewChatter
             messageHistory = new List<TurboMessage>
             {
                 /* Open AI warns:
-                gpt-3.5-turbo-0301 does not always pay strong attention to system messages.
-                Future models will be trained to pay stronger attention to system messages.
-                https://platform.openai.com/docs/guides/chat/introduction
+                "gpt-3.5-turbo-0301 does not always pay strong attention to system messages.
+                Future models will be trained to pay stronger attention to system messages."
+                    https://platform.openai.com/docs/guides/chat/introduction
                 Therefore, short instructions as a system message, detailed as a user message. */
                 new TurboMessage(TurboMessage.Role.system, "You are engaging in a roleplay as a character in Stardew Valley."),
                 new TurboMessage(TurboMessage.Role.user, ConvoParser.ParseTemplate(npc)),
@@ -42,7 +45,12 @@ namespace StardewChatter
 
         public override Task<string> Chat(string userInput)
         {
-            // TODO
+            userInput = SanitizePrompt(userInput);
+            messageHistory.Add(new TurboMessage(TurboMessage.Role.user, userInput));
+            requestBodyTemplate.messages = messageHistory;
+            ModEntry.Log(JsonSerializer.Serialize(messageHistory));
+            var requestPayload = new StringContent(JsonSerializer.Serialize(requestBodyTemplate), Encoding.UTF8, "application/json" );
+            var request = new HttpRequestMessage(HttpMethod.Post, COMPLETIONS_URL) {Content = requestPayload};
             return Task.FromResult("hello!!");
         }
     }
