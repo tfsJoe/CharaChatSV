@@ -1,9 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Net.Http;
-using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
@@ -14,6 +11,7 @@ namespace StardewChatter
     {
         private readonly DaVinciRequestBody requestBodyTemplate;
         protected override int RequestWaitTime => 3500;
+        protected override string CompletionsUrl => "https://api.openai.com/v1/completions";
         private string chatLog = "";
 
         public DaVinciFetcher(IModHelper helper) : base(helper)
@@ -31,7 +29,7 @@ namespace StardewChatter
 
         public override void SetUpChat(NPC npc)
         {
-            chatLog = ConvoParser.ParseTemplate(npc);
+            chatLog = ConvoParser.ParseTemplate(npc, this);
         }
 
         public override async Task<string> Chat(string userInput)
@@ -39,19 +37,14 @@ namespace StardewChatter
             userInput = SanitizePrompt(userInput);
             chatLog += $"\n@human: {userInput}\n@ai: ";
             requestBodyTemplate.prompt = chatLog;
-            var requestPayload = new StringContent(JsonSerializer.Serialize(requestBodyTemplate), Encoding.UTF8, "application/json" );
-            var request = new HttpRequestMessage(HttpMethod.Post, COMPLETIONS_URL) {Content = requestPayload};
-            ModEntry.Log(request.ToString());
-            ModEntry.Log(await requestPayload.ReadAsStringAsync());
-            await RateLimit();
-            waitForRateLimit = true;
-            var httpResponse = await client.SendAsync(request);
+            
+            var httpResponse = await SendChatRequest(requestBodyTemplate);
             if (!httpResponse.IsSuccessStatusCode)
             {
-                ModEntry.monitor.Log($"{(int)httpResponse.StatusCode} {httpResponse.StatusCode}:" +
-                                     $"{httpResponse.ReasonPhrase}\n{httpResponse.Content}");
-                return $"(Failure! {(int)httpResponse.StatusCode} {httpResponse.StatusCode}: {httpResponse.ReasonPhrase})";
+                return $"(Failure! {(int)httpResponse.StatusCode} {httpResponse.StatusCode}: " +
+                       $"{httpResponse.ReasonPhrase})";
             }
+            
             string reply;
             using (var doc = await JsonDocument.ParseAsync(await httpResponse.Content.ReadAsStreamAsync()))
             {
@@ -73,10 +66,7 @@ namespace StardewChatter
                 return "(No response...)";
             }
 
-            reply = Regex.Unescape(reply);
-            if (reply.Length > 1 && reply[0] == ' ')
-                reply = reply.Substring(1, reply.Length - 1);
-            reply = reply.Replace("@", ""); // AI sometimes uses @ before player char's name.
+            reply = SanitizeReply(reply);
             chatLog += reply;
             return reply;
         }

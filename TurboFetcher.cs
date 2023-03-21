@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using StardewModdingAPI;
@@ -12,6 +11,7 @@ namespace StardewChatter
     public sealed class TurboFetcher : ChatFetcher
     {
         protected override int RequestWaitTime => 3500;
+        protected override string CompletionsUrl => "https://api.openai.com/v1/chat/completions";
 
         private TurboRequestBody requestBodyTemplate;
         private List<TurboMessage> messageHistory = new();
@@ -38,20 +38,61 @@ namespace StardewChatter
                 Future models will be trained to pay stronger attention to system messages."
                     https://platform.openai.com/docs/guides/chat/introduction
                 Therefore, short instructions as a system message, detailed as a user message. */
-                new TurboMessage(TurboMessage.Role.system, "You are engaging in a roleplay as a character in Stardew Valley."),
-                new TurboMessage(TurboMessage.Role.user, ConvoParser.ParseTemplate(npc)),
+                new (TurboMessage.Role.system, 
+                    $"You are engaging in a roleplay as the character {npc.Name} in Stardew Valley."),
+                new (TurboMessage.Role.user, ConvoParser.ParseTemplate(npc, this)),
             };
         }
 
-        public override Task<string> Chat(string userInput)
+        public override async Task<string> Chat(string userInput)
         {
             userInput = SanitizePrompt(userInput);
             messageHistory.Add(new TurboMessage(TurboMessage.Role.user, userInput));
             requestBodyTemplate.messages = messageHistory;
-            ModEntry.Log(JsonSerializer.Serialize(messageHistory));
-            var requestPayload = new StringContent(JsonSerializer.Serialize(requestBodyTemplate), Encoding.UTF8, "application/json" );
-            var request = new HttpRequestMessage(HttpMethod.Post, COMPLETIONS_URL) {Content = requestPayload};
-            return Task.FromResult("hello!!");
+            var httpResponse = await SendChatRequest(requestBodyTemplate);
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                return $"(Failure! {(int)httpResponse.StatusCode} {httpResponse.StatusCode}: " +
+                       $"{httpResponse.ReasonPhrase})";
+            }
+            
+            string reply;
+            using (var doc = await JsonDocument.ParseAsync(await httpResponse.Content.ReadAsStreamAsync()))
+            {
+                try
+                {
+                    var choice0 = doc.RootElement.GetProperty("choices")[0];
+                    var messageElement = choice0.GetProperty("message");
+                    var role = messageElement.GetProperty("role").GetString();
+                    if (TurboMessage.Role.assistant.ToString() != role)
+                    {
+                        return $"(Failure! Unexpected message role: {role})";
+                    }
+                    var finishReason = choice0.GetProperty("finish_reason").GetString();
+                    if (finishReason == "content_filter")
+                    {
+                        messageHistory.RemoveAt(messageHistory.Count - 1);
+                        return "(I'm speechless...)$s";
+                    }
+                    reply = messageElement.GetProperty("content").GetString();
+                }
+                catch (InvalidOperationException e)
+                {
+                    ModEntry.Log(e.Message);
+                    return $"(Failure! Couldn't understand response.)";
+                }
+            }
+            if (string.IsNullOrEmpty(reply))
+            {
+#if DEBUG
+                ModEntry.Log(await httpResponse.Content.ReadAsStringAsync());
+#endif
+                return "(No response...)";
+            }
+
+            reply = SanitizeReply(reply);
+            messageHistory.Add(new TurboMessage(TurboMessage.Role.assistant, reply));
+            return reply;
         }
     }
 }

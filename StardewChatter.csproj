@@ -10,7 +10,10 @@
   
   <!-- Normal resources -->
   <ItemGroup>
-    <EmbeddedResource Include="promptTemplate.txt">
+    <EmbeddedResource Include="davinci-promptTemplate.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="turbo-promptTemplate.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="davinci-requestTemplate.json">

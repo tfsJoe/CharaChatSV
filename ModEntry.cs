@@ -28,6 +28,7 @@ namespace StardewChatter
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            Manifest.Init(helper);
             ModDirectory = helper.DirectoryPath;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
             monitor ??= Monitor;

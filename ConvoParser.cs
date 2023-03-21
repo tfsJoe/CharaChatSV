@@ -1,18 +1,35 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using StardewValley;
 
 namespace StardewChatter
 {
     public static class ConvoParser
     {
-        private static string TemplatePath => Path.Combine(ModEntry.ModDirectory, "promptTemplate.txt");
+        private static string ResolveTemplatePath(ChatFetcher source)
+        {
+            string fileName;
+            switch (source)
+            {
+                case DaVinciFetcher:
+                    fileName = "davinci-promptTemplate.txt";
+                    break;
+                case TurboFetcher:
+                    fileName = "turbo-promptTemplate.txt";
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown fetcher type '{source.GetType().Name}; " +
+                                                "no known corresponding prompt template file");
+            }
+            return Path.Combine(ModEntry.ModDirectory, fileName);
+        }
 
-        public static string ParseTemplate(NPC npc)
+        public static string ParseTemplate(NPC npc, ChatFetcher source)
         {
             if (npc == null) return null;
-            string prompt = File.ReadAllText(TemplatePath);
+            // TODO: cache so we aren't reading template files off disk every chat turn.
+            string prompt = File.ReadAllText(ResolveTemplatePath(source));
 
             string ageGroup = npc.Age switch
             {

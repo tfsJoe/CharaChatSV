@@ -1,6 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
@@ -10,14 +15,14 @@ namespace StardewChatter
     public abstract class ChatFetcher
     {
         protected readonly HttpClient client = new();
-        private class ModVersion { public string Version { get; set; }} // Data class for parsing manifest.json
+
         protected abstract int RequestWaitTime { get; }
-        protected const string COMPLETIONS_URL = "https://api.openai.com/v1/completions";
+        protected abstract string CompletionsUrl { get; }
         protected static bool waitForRateLimit;
 
         public ChatFetcher(IModHelper helper)
         {
-            var modVersion = helper.Data.ReadJsonFile<ModVersion>("manifest.json")?.Version;
+            var modVersion = Manifest.Inst?.Version;
             if (modVersion == null) modVersion = "";
             
             var keyManager = helper.Data.ReadJsonFile<ApiKeyManager>("apiKeys.json");
@@ -34,7 +39,35 @@ namespace StardewChatter
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
         }
 
+        public static ChatFetcher Instantiate(IModHelper helper)
+        {
+            ModEntry.Log($"StardewChatter version: {Manifest.Inst.Version}");
+            var modelSetting = Manifest.Inst?.AiModel;
+            switch (modelSetting)
+            {
+                case "davinci":
+                    ModEntry.monitor.Log($"This AI setting will use your credits around 10x faster! \n" +
+                                         $"Recommended to use 'turbo'. Set in manifest.json file.",
+                        LogLevel.Alert);
+                    return new DaVinciFetcher(helper);
+                case "turbo":
+                case "default":
+                    return new TurboFetcher(helper);
+                default:
+                    ModEntry.monitor.Log($"Did not understand AI model setting '{modelSetting}', using default.",
+                        LogLevel.Warn);
+                    return new TurboFetcher(helper);
+            }
+        }
+
         public abstract void SetUpChat(NPC npc);
+        
+        /// <remarks>
+        /// Subclass implementations are responsible for preparing the request and parsing the response,
+        /// since both the input and output defined by the chat API may differ based on the AI model used.
+        /// However, they should rely on SendChatRequest and SanitizeReply from this superclass.
+        /// </remarks>
+        /// <returns>The text reply from the chat AI, appropriately parsed and sanitized.</returns>
         public abstract Task<string> Chat(string userInput);
         
         //TODO
@@ -47,6 +80,48 @@ namespace StardewChatter
         {
             if (waitForRateLimit) await Task.Delay(RequestWaitTime);
             waitForRateLimit = false;
+        }
+        
+        protected async Task<HttpResponseMessage> SendChatRequest(object requestBody)
+        {
+            if (requestBody == null) 
+                throw new ArgumentNullException(nameof(requestBody), "Must not be null");
+            string json;
+            var options = new JsonSerializerOptions
+            {
+#if DEBUG
+                WriteIndented = true
+#endif
+            };
+            try { json = JsonSerializer.Serialize(requestBody, options); }
+            catch (NotSupportedException)
+            {
+                ModEntry.Log($"Couldn't serialize requestBody! {requestBody.GetType()} {requestBody}");
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
+            var requestPayload = new StringContent(json, Encoding.UTF8, "application/json" );
+            var request = new HttpRequestMessage(HttpMethod.Post, CompletionsUrl) {Content = requestPayload};
+            ModEntry.Log(request.ToString());
+            ModEntry.Log($"(RequestBody)\n{json}");
+            await RateLimit();
+            waitForRateLimit = true;
+            var httpResponse = await client.SendAsync(request);
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                ModEntry.monitor.Log($"{(int)httpResponse.StatusCode} {httpResponse.StatusCode}:" +
+                                     $"{httpResponse.ReasonPhrase}\n{httpResponse.Content}");
+            }
+            RateLimit();    // Not awaited so we can reset countown if user takes longer than wait time (very likely.)
+            return httpResponse;
+        }
+
+        protected virtual string SanitizeReply(string reply)
+        {
+            reply = Regex.Unescape(reply);
+            if (reply.Length > 1 && reply[0] == ' ')
+                reply = reply.Substring(1, reply.Length - 1);
+            reply = reply.Replace("@", ""); // AI sometimes uses @ before player char's name.
+            return reply;
         }
     }
 }
