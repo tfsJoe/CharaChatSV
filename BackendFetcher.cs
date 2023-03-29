@@ -89,7 +89,7 @@ namespace StardewChatter
             public int hearts { get; set; }
             public int dayNum { get; set; }
             public string relationshipStatus { get; set; }
-            public string npcSubPronCap { get; set; }
+            public string npcSubjPronCap { get; set; }
             public string npcPosPron { get; set; }
             public string npcName { get; set; }
             public string playerName { get; set; }
@@ -108,10 +108,11 @@ namespace StardewChatter
                 optimisim = npc.Optimism;
                 bool gotFriendship = Game1.player.friendshipData.TryGetValue(npc.Name, out var friendship);
                 npcName = npc.Name;
-                npcSubPronCap = npc.Gender == 0 ? "He" : "She";
+                npcSubjPronCap = npc.Gender == 0 ? "He" : "She";
                 npcPosPron = npc.Gender == 0 ? "his" : "her";
                 playerName = Game1.player.Name;
                 playerGender = Game1.player.IsMale ? "male" : "female";
+                playerPosPron = Game1.player.IsMale ? "his" : "her";
                 hearts = Game1.player.getFriendshipHeartLevelForNPC(npc.Name);
                 location = Game1.currentLocation.Name;
                 timeOfDay = Game1.getTimeOfDayString(Game1.timeOfDay);
