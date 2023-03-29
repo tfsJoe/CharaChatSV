@@ -19,9 +19,8 @@ namespace StardewChatter
 
         protected override int RequestWaitTime => 1500;
 
-        protected override string CompletionsUrl => "http://localhost:8888/api/stardewChat";
-
-        // protected override string CompletionsUrl => "https://starchatter.netlify.app/stardewChat";
+        protected override string CompletionsUrl => Manifest.Inst.ApiUrl;
+        
         public override void SetUpChat(NPC npc)
         {
             promptParams = new PromptParams(npc);
