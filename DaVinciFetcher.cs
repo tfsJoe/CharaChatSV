@@ -32,7 +32,7 @@ namespace StardewChatter
             chatLog = ConvoParser.ParseTemplate(npc, this);
         }
 
-        public override async Task<string> Chat(string userInput)
+        public override async Task<string> Chat(string userInput, Guid _, Guid __)
         {
             userInput = SanitizePrompt(userInput);
             chatLog += $"\n@human: {userInput}\n@ai: ";

@@ -49,14 +49,20 @@ namespace StardewChatter
                     ModEntry.monitor.Log($"This AI setting will use your credits around 10x faster! \n" +
                                          $"Recommended to use 'turbo'. Set in manifest.json file.",
                         LogLevel.Alert);
-                    return new DaVinciFetcher(helper);
+                    // return new DaVinciFetcher(helper);
+                    BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
+                    return new BackendFetcher(helper);
                 case "turbo":
                 case "default":
-                    return new TurboFetcher(helper);
+                    // return new TurboFetcher(helper);
+                    BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
+                    return new BackendFetcher(helper);
                 default:
                     ModEntry.monitor.Log($"Did not understand AI model setting '{modelSetting}', using default.",
                         LogLevel.Warn);
-                    return new TurboFetcher(helper);
+                    // return new TurboFetcher(helper);
+                    BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
+                    return new BackendFetcher(helper);
             }
         }
 
@@ -68,7 +74,7 @@ namespace StardewChatter
         /// However, they should rely on SendChatRequest and SanitizeReply from this superclass.
         /// </remarks>
         /// <returns>The text reply from the chat AI, appropriately parsed and sanitized.</returns>
-        public abstract Task<string> Chat(string userInput);
+        public abstract Task<string> Chat(string userInput, Guid loginToken, Guid convoId);
         
         //TODO
         protected static string SanitizePrompt(string prompt)

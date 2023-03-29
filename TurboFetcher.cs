@@ -44,7 +44,7 @@ namespace StardewChatter
             };
         }
 
-        public override async Task<string> Chat(string userInput)
+        public override async Task<string> Chat(string userInput, Guid _, Guid __)
         {
             userInput = SanitizePrompt(userInput);
             messageHistory.Add(new TurboMessage(TurboMessage.Role.user, userInput));

@@ -20,6 +20,29 @@ namespace StardewChatter
         private Rectangle curEmotionSpriteRect;
         private string npcReply = "";
         private readonly ChatFetcher chatApi;
+        
+        private Guid currentConvoId;
+        private Guid loginToken = Guid.Empty;
+
+        private Guid LoginToken
+        {
+            get
+            {
+                if (loginToken != Guid.Empty) return loginToken;
+                var tokenString = helper.Data.ReadGlobalData<string>("chatterLoginToken");
+                if (tokenString != null)
+                {
+                    ModEntry.Log($"Read login token: {tokenString}");
+                    loginToken = Guid.Parse(tokenString);
+                    return loginToken;
+                }
+                loginToken = Guid.NewGuid();
+                tokenString = loginToken.ToString();
+                helper.Data.WriteGlobalData("chatterLoginToken", tokenString);
+                ModEntry.Log($"Made new login token {tokenString}");
+                return loginToken;
+            }
+        }
 
         private Status status = Status.Closed;
         public Status Status
@@ -87,10 +110,12 @@ namespace StardewChatter
                 Status = Status.Closed;
                 return;
             }
+
+            currentConvoId = Guid.NewGuid();
+            ModEntry.Log($"New chat ID: {currentConvoId}");
             interlocutor = npc;
             Status = Status.OpenInit;
             chatApi.SetUpChat(npc);
-            // chatLog = ConvoParser.ParseTemplate(npc); // TODO: move to ChatFetchers
             Game1.activeClickableMenu = this;
             Game1.playSound("bigSelect");
         }
@@ -102,11 +127,10 @@ namespace StardewChatter
             textInput.LockInput();
             UpdateOnReply(textInput.Content);
         }
-
-        // TODO: refactor. The chat log is not the entire prompt for Turbo. Responsibility for keeping chat history needs to fall on the fetcher.
+        
         private async void UpdateOnReply(string nextInput)
         {
-            npcReply = await chatApi.Chat(nextInput);
+            npcReply = await chatApi.Chat(nextInput, LoginToken, currentConvoId);
             curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
             textInput.UnlockAfterDelay();
             if (Status == Status.Closed) return;
