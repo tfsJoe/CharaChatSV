@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -111,7 +112,17 @@ namespace StardewChatter
             ModEntry.Log($"(RequestBody)\n{json}");
             await RateLimit();
             waitForRateLimit = true;
-            var httpResponse = await client.SendAsync(request);
+            HttpResponseMessage httpResponse = null;
+            try {httpResponse = await client.SendAsync(request); }
+            catch (HttpRequestException e)
+            {
+                httpResponse = new HttpResponseMessage()
+                {
+                    StatusCode = HttpStatusCode.BadGateway,
+                    ReasonPhrase = e.Message
+                };
+            }
+
             if (!httpResponse.IsSuccessStatusCode)
             {
                 ModEntry.monitor.Log($"{(int)httpResponse.StatusCode} {httpResponse.StatusCode}:" +
