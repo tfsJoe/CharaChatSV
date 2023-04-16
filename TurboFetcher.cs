@@ -46,7 +46,7 @@ namespace StardewChatter
 
         public override async Task<string> Chat(string userInput, Guid _, Guid __)
         {
-            userInput = SanitizePrompt(userInput);
+            userInput = Sanitize(userInput);
             messageHistory.Add(new TurboMessage(TurboMessage.Role.user, userInput));
             requestBodyTemplate.messages = messageHistory;
             var httpResponse = await SendChatRequest(requestBodyTemplate);

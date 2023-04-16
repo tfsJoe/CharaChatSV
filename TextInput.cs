@@ -22,7 +22,7 @@ namespace StardewChatter
         private IKeyboardSubscriber previousSubscriber;
         private readonly Action enterKeyAction;
         
-        private const int MAX_CHAR_COUNT = 300;
+        public const int MAX_CHAR_COUNT = 300;
         private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@', '\n', '\r', '\t'};
         private bool clearOnNextInput;
         private bool lockout;

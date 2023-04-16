@@ -34,7 +34,7 @@ namespace StardewChatter
 
         public override async Task<string> Chat(string userInput, Guid _, Guid __)
         {
-            userInput = SanitizePrompt(userInput);
+            userInput = Sanitize(userInput);
             chatLog += $"\n@human: {userInput}\n@ai: ";
             requestBodyTemplate.prompt = chatLog;
             

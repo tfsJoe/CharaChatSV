@@ -28,7 +28,7 @@ namespace StardewChatter
 
         public override async Task<string> Chat(string userInput, Guid loginToken, Guid convoId)
         {
-            userInput = SanitizePrompt(userInput);
+            userInput = Sanitize(userInput);
             var body = new BackendRequestBody(loginToken, convoId, userInput, aiModel, promptParams);
             promptParams = null;    // Only needed for first chat after setup
             var httpResponse = await SendChatRequest(body);
@@ -67,6 +67,8 @@ namespace StardewChatter
             [JsonConverter(typeof(JsonStringEnumConverter))]
             public AiModel aiModel { get; set; }
             public PromptParams promptParams { get; set; }
+
+            public string modVersion => Manifest.Inst.Version;
 
             public BackendRequestBody(Guid loginToken, Guid convoGuid, string playerLine,
                 AiModel aiModel = AiModel.Default, PromptParams promptParams = null)

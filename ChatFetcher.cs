@@ -76,11 +76,16 @@ namespace StardewChatter
         /// </remarks>
         /// <returns>The text reply from the chat AI, appropriately parsed and sanitized.</returns>
         public abstract Task<string> Chat(string userInput, Guid loginToken, Guid convoId);
-        
-        //TODO
-        protected static string SanitizePrompt(string prompt)
+
+        protected static string Sanitize(string userInput)
         {
-            return prompt;
+            if (userInput.Length > TextInput.MAX_CHAR_COUNT)
+            {
+                ModEntry.Log($"Prompt too long ({userInput.Length} chars), truncating to {TextInput.MAX_CHAR_COUNT} chars");
+                userInput = userInput.Substring(0, TextInput.MAX_CHAR_COUNT);
+            }
+
+            return userInput;
         }
         
         protected async Task RateLimit()
