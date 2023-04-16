@@ -64,11 +64,10 @@ namespace StardewChatter
             public string t { get; set; }    // Login token. TODO: can we transmit GUIDs as a number? Worth doing?
             public string convoId { get; set; }
             public string playerLine { get; set; }
+            public string modVersion => Manifest.Inst.Version;
             [JsonConverter(typeof(JsonStringEnumConverter))]
             public AiModel aiModel { get; set; }
             public PromptParams promptParams { get; set; }
-
-            public string modVersion => Manifest.Inst.Version;
 
             public BackendRequestBody(Guid loginToken, Guid convoGuid, string playerLine,
                 AiModel aiModel = AiModel.Default, PromptParams promptParams = null)

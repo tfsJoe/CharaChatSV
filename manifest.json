@@ -7,6 +7,6 @@
 	"EntryDll": "StardewChatter.dll",
 	"MinimumApiVersion": "3.0.0",
 	"UpdateKeys": [],
-	"AiModel" : "davinci",
-	"ApiUrl": "https://starchatter.netlify.app/api/stardewChat"
+	"AiModel" : "default",
+	"ApiUrl": "https://customize--starchatter.netlify.app/api/stardewChat"
 }
