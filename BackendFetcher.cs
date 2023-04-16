@@ -67,6 +67,9 @@ namespace StardewChatter
             public string modVersion => Manifest.Inst.Version;
             [JsonConverter(typeof(JsonStringEnumConverter))]
             public AiModel aiModel { get; set; }
+            [JsonConverter(typeof(JsonStringEnumConverter))]
+            public LocalizedContentManager.LanguageCode language => LocalizedContentManager.CurrentLanguageCode;
+
             public PromptParams promptParams { get; set; }
 
             public BackendRequestBody(Guid loginToken, Guid convoGuid, string playerLine,
