@@ -8,5 +8,5 @@
 	"MinimumApiVersion": "3.0.0",
 	"UpdateKeys": [],
 	"AiModel" : "default",
-	"ApiUrl": "https://starchatter.netlify.app/api/stardewChat"
+	"ApiUrl": "https://customize--starchatter.netlify.app/api/stardewChat"
 }

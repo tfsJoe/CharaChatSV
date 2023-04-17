@@ -232,6 +232,13 @@ namespace StardewChatter
             lockout = false;
             clearOnNextInput = true;
         }
+        
+        public void LockoutWithMessage(string message)
+        {
+            lockout = true;
+            Content = message;
+            CaretIndex = Content.Length;
+        }
 
         bool IKeyboardSubscriber.Selected
         {

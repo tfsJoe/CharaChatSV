@@ -6,6 +6,7 @@ using StardewValley;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace StardewChatter
 {
@@ -17,7 +18,7 @@ namespace StardewChatter
         private int x, yTop, yBottom, w, hTop, hBottom;
 
         private NPC interlocutor;
-        private Rectangle curEmotionSpriteRect;
+        private Rectangle? curEmotionSpriteRect;
         private string npcReply = "";
         private readonly ChatFetcher chatApi;
         
@@ -115,6 +116,7 @@ namespace StardewChatter
             interlocutor = npc;
             Status = Status.OpenInit;
             chatApi.SetUpChat(npc);
+            textInput.lockout = false;
             Game1.activeClickableMenu = this;
             Game1.playSound("bigSelect");
         }
@@ -133,7 +135,6 @@ namespace StardewChatter
             npcReply = response.Reply;
             UpdateBalance(response.Balance);
             curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
-            textInput.UnlockAfterDelay();
         }
         
         private async void UpdateOnResponse(string nextInput)
@@ -144,17 +145,28 @@ namespace StardewChatter
             {
                 case ResponseSignal.ok:
                     ShowReply(response);
+                    textInput.UnlockAfterDelay();
                     break;
                 case ResponseSignal.underfunded:
                     npcReply = "(Out of popcorn! Shop window will open in a moment.)";
                     textInput.lockout = false;
                     textInput.clearOnNextInput = false;
-                    // TODO: open shop window
+                    await Task.Delay(2000);
+                    if (Status != Status.Closed)
+                        System.Diagnostics.Process.Start("https://starchatter.netlify.app/shop");
                     break;
                 case ResponseSignal.moderated:
                     Status = Status.Closed;
                     bool male = interlocutor.Gender == 0;
                     Game1.drawDialogue(interlocutor, $"({(male ? "He" : "She")} seems speechless.$s)");
+                    break;
+                case ResponseSignal.final:
+                    ShowReply(response);
+                    textInput.LockoutWithMessage("(Alright, I think it's about time we move on with our day.)");
+                    break;
+                case ResponseSignal.unknown:
+                    npcReply = response.Reply;  // Expected to contain error message
+                    textInput.UnlockAfterDelay();
                     break;
             }
             Status = Status.OpenDisplaying;
@@ -201,7 +213,8 @@ namespace StardewChatter
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenDisplaying:
-                    interlocutor?.DrawPortrait(b, curEmotionSpriteRect, NpcPortraitRect);
+                    if (curEmotionSpriteRect.HasValue)
+                        interlocutor?.DrawPortrait(b, curEmotionSpriteRect.Value, NpcPortraitRect);
 
                     if (!string.IsNullOrEmpty(npcReply))
                     {
