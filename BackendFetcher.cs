@@ -177,10 +177,14 @@ namespace StardewChatter
             };
             if (json.TryGetProperty("balance", out var balance))
             {
-                if (!balance.TryGetInt32(out var balanceAsInt))
+                if (balance.ValueKind == JsonValueKind.Number)
+                {
+                    response.Balance = balance.GetInt32();
+                }
+                else
                 {
                     response.Balance = null;
-                } else response.Balance = balanceAsInt;
+                } 
             }
             else response.Balance = null;
             return response;

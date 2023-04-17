@@ -114,6 +114,7 @@ namespace StardewChatter
             currentConvoId = Guid.NewGuid();
             ModEntry.Log($"New chat ID: {currentConvoId}");
             interlocutor = npc;
+            curEmotionSpriteRect = null;
             Status = Status.OpenInit;
             chatApi.SetUpChat(npc);
             textInput.lockout = false;
@@ -148,12 +149,12 @@ namespace StardewChatter
                     textInput.UnlockAfterDelay();
                     break;
                 case ResponseSignal.underfunded:
-                    npcReply = "(Out of popcorn! Shop window will open in a moment.)";
+                    npcReply = "(Not enough popcorn! Shop window will open in your web browser.)";
                     textInput.lockout = false;
                     textInput.clearOnNextInput = false;
-                    await Task.Delay(2000);
+                    await Task.Delay(3000);
                     if (Status != Status.Closed)
-                        System.Diagnostics.Process.Start("https://starchatter.netlify.app/shop");
+                        Extensions.OpenUrl("https://starchatter.netlify.app/shop");
                     break;
                 case ResponseSignal.moderated:
                     Status = Status.Closed;
@@ -229,8 +230,12 @@ namespace StardewChatter
             }
             
             // Buttons
-            clearButton.Draw(b);
-            submitButton.Draw(b);
+            if (!textInput.lockout)
+            {
+                clearButton.Draw(b);
+                submitButton.Draw(b);
+            }
+
             b.Draw(Game1.mouseCursors, CloseButtonRect, CloseButtonSource, Color.White);
 
             drawMouse(b);
@@ -239,8 +244,12 @@ namespace StardewChatter
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
             base.receiveLeftClick(x, y, playSound);
-            clearButton.DetectClick(x, y);
-            submitButton.DetectClick(x, y);
+            if (!textInput.lockout)
+            {
+                clearButton.DetectClick(x, y);
+                submitButton.DetectClick(x, y);
+            }
+
             DetectCloseButtonClick(x, y);
         }
 
