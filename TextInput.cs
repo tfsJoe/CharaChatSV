@@ -24,8 +24,8 @@ namespace StardewChatter
         
         public const int MAX_CHAR_COUNT = 300;
         private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@', '\n', '\r', '\t'};
-        private bool clearOnNextInput;
-        private bool lockout;
+        public bool clearOnNextInput;
+        public bool lockout;
         private const int LOCKOUT_TIME = 1500;
 
         private string content = "";
@@ -225,8 +225,6 @@ namespace StardewChatter
             CaretIndex = 0;
             Game1.playSound("cancel");
         }
-
-        public void LockInput() => lockout = true;
 
         public async void UnlockAfterDelay()
         {

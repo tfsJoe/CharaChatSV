@@ -1,4 +1,6 @@
-﻿using System;
+﻿// This functionality is now handled on the server. Can re-enable if that changes.
+/*
+using System;
 using System.IO;
 using System.Linq;
 using StardewValley;
@@ -92,3 +94,4 @@ namespace StardewChatter
         }
     }
 }
+*/

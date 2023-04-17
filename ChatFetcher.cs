@@ -74,8 +74,9 @@ namespace StardewChatter
         /// since both the input and output defined by the chat API may differ based on the AI model used.
         /// However, they should rely on SendChatRequest and SanitizeReply from this superclass.
         /// </remarks>
-        /// <returns>The text reply from the chat AI, appropriately parsed and sanitized.</returns>
-        public abstract Task<string> Chat(string userInput, Guid loginToken, Guid convoId);
+        /// <returns>A tuple containing a signal describing any issues encountered while generating response,
+        /// and the text reply from the chat AI, appropriately parsed and sanitized.</returns>
+        public abstract Task<BackendResponse> Chat(string userInput, Guid loginToken, Guid convoId);
 
         protected static string Sanitize(string userInput)
         {
@@ -136,6 +137,13 @@ namespace StardewChatter
             RateLimit();    // Not awaited so we can reset countown if user takes longer than wait time (very likely.)
             return httpResponse;
         }
+        
+        /// <summary>
+        /// Some subclasses may need to clean up the initial prompt, but only if the reply was successful.
+        /// If the initial prompt failed despite a response (e.g. out of popcorn, user input was moderated, etc,
+        /// then the prompt needs to be retained for the next attempt.
+        /// </summary>
+        public virtual void ReplySucceeded() {}
 
         protected virtual string SanitizeReply(string reply)
         {

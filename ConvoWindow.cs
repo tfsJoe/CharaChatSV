@@ -101,7 +101,6 @@ namespace StardewChatter
         /// Warning: if you do not, behavior will be unpredictable. May show old convos.
         /// </summary>
         /// <param name="npc">To which NPC is the player speaking?</param>
-        /// <param name="prompt">What has the player said to this NPC?</param>
         public void StartConversation(NPC npc)
         {
             if (npc == null)
@@ -124,17 +123,47 @@ namespace StardewChatter
         {
             Game1.playSound("select");
             Status = Status.OpenWaiting;
-            textInput.LockInput();
-            UpdateOnReply(textInput.Content);
+            textInput.lockout = true;
+            UpdateOnResponse(textInput.Content);
         }
-        
-        private async void UpdateOnReply(string nextInput)
+
+        private void ShowReply(BackendResponse response)
         {
-            npcReply = await chatApi.Chat(nextInput, LoginToken, currentConvoId);
+            chatApi.ReplySucceeded();
+            npcReply = response.Reply;
+            UpdateBalance(response.Balance);
             curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
             textInput.UnlockAfterDelay();
+        }
+        
+        private async void UpdateOnResponse(string nextInput)
+        {
+            var response = await chatApi.Chat(nextInput, LoginToken, currentConvoId);
             if (Status == Status.Closed) return;
+            switch (response.Signal)
+            {
+                case ResponseSignal.ok:
+                    ShowReply(response);
+                    break;
+                case ResponseSignal.underfunded:
+                    npcReply = "(Out of popcorn! Shop window will open in a moment.)";
+                    textInput.lockout = false;
+                    textInput.clearOnNextInput = false;
+                    // TODO: open shop window
+                    break;
+                case ResponseSignal.moderated:
+                    Status = Status.Closed;
+                    bool male = interlocutor.Gender == 0;
+                    Game1.drawDialogue(interlocutor, $"({(male ? "He" : "She")} seems speechless.$s)");
+                    break;
+            }
             Status = Status.OpenDisplaying;
+        }
+
+        void UpdateBalance(int? balance)
+        {
+            // TODO
+            ModEntry.Log($"Popcorn balance: {balance}");
         }
         
         public override void draw(SpriteBatch b)
