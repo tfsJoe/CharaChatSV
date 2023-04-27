@@ -7,7 +7,7 @@ using StardewValley;
 
 namespace StardewChatter
 {
-    public static class PortraitUtil
+    public static class EmotionUtil
     {
         /// <summary>Based on inspecting the spritesheets</summary>
         public static IReadOnlyDictionary<string, IReadOnlyList<string>> CharacterEmotions =
@@ -485,7 +485,7 @@ namespace StardewChatter
                         "Neutral",
                         "Happy",
                         "Disappointed",
-                        "content"
+                        "Content"
                     }
                 },
                 {
@@ -493,7 +493,6 @@ namespace StardewChatter
                     {
                         "Neutral",
                         "Happy",
-                        ""
                     }
                 }
             };
@@ -526,13 +525,16 @@ namespace StardewChatter
                 index = i;
                 break;
             }
-            ModEntry.Log($"{npc.Name} has emotion {emotion} at index {index}");
+            // ModEntry.Log($"{npc.Name} has emotion {emotion} at index {index}");
             return IndexToRect(index);
         }
         
-        public static string ExtractEmotion(string text)
+        public static string ExtractEmotion(ref string text)
         {
-            var match = Regex.Match(text, @"\$([a-zA-Z]+)");
+            var pattern = @"\$([a-zA-Z]+)";
+            var match = Regex.Match(text, pattern);
+            if (match.Success)
+                text = Regex.Replace(text, pattern, "");
             return match.Success ? match.Groups[1].Value : null;
         }
 

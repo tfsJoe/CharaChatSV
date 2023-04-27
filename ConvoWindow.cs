@@ -136,7 +136,7 @@ namespace StardewChatter
             npcReply = response.Reply;
             UpdateBalance(response.Balance);
             curEmotionSpriteRect =
-                PortraitUtil.EmotionToPortraitRect(interlocutor, PortraitUtil.ExtractEmotion(npcReply));
+                EmotionUtil.EmotionToPortraitRect(interlocutor, EmotionUtil.ExtractEmotion(ref npcReply));
         }
         
         private async void UpdateOnResponse(string nextInput)

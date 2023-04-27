@@ -36,7 +36,7 @@ namespace StardewChatter
         {
             destinationRect ??= new Rectangle(Game1.viewport.Width - 256, 0, 128, 128);
             batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
-                sourceRectangle: PortraitUtil.EmotionToPortraitRect(npc, emotion), Color.White);
+                sourceRectangle: EmotionUtil.EmotionToPortraitRect(npc, emotion), Color.White);
         }
         
         public static void DrawPortrait(this NPC npc, SpriteBatch batch,
