@@ -165,6 +165,22 @@ namespace StardewChatter
                     ShowReply(response);
                     textInput.LockoutWithMessage("(Alright, I think it's about time we move on with our day.)");
                     break;
+                case ResponseSignal.tooLong:
+                    npcReply = "";
+                    textInput.LockoutWithMessage("(This has been going on a while... " +
+                                                 $"I'd better leave {interlocutor.Name} alone.)");
+                    break;
+                case ResponseSignal.rateLimited:
+                    npcReply = "Too many people want to chat with us right now. Please try again later.\n" +
+                               "(Service over capacity)";
+                    break;
+                case ResponseSignal.obsolete:
+                    Status = Status.Closed;
+                    Game1.drawObjectDialogue("Please update Stardew Chatter to chat with NPCs. Opening in browser...");
+                    await Task.Delay(3000);
+                    // TODO: open mod page instead
+                    Extensions.OpenUrl("https://starchatter.netlify.app/");
+                    break;
                 case ResponseSignal.unknown:
                     npcReply = response.Reply;  // Expected to contain error message
                     textInput.UnlockAfterDelay();
