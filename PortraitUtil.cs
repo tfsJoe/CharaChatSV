@@ -520,8 +520,8 @@ namespace StardewChatter
             var index = -1;
             for (var i = 0; i < emotions.Count; ++i)
             {
-                if (!string.Equals(emotions[i].ToLower(), emotion.ToLower(),
-                        StringComparison.CurrentCultureIgnoreCase))
+                if (!string.Equals(emotions[i], emotion,
+                        StringComparison.InvariantCultureIgnoreCase))
                     continue;
                 index = i;
                 break;
@@ -536,9 +536,11 @@ namespace StardewChatter
             return match.Success ? match.Groups[1].Value : null;
         }
 
-        public static IReadOnlyList<string> GetEmotionNames(this NPC npc)
+        public static IEnumerable<string> GetEmotionNames(this NPC npc)
         {
-            return CharacterEmotions.ContainsKey(npc.Name) ? CharacterEmotions[npc.Name] : null;
+            return CharacterEmotions.ContainsKey(npc.Name) ? 
+                CharacterEmotions[npc.Name].Where(e => e != "(skip)") :
+                null;
         }
     }
 }
