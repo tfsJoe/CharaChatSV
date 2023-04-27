@@ -23,20 +23,8 @@ namespace StardewChatter
 
         public ChatFetcher(IModHelper helper)
         {
-            var modVersion = Manifest.Inst?.Version;
-            if (modVersion == null) modVersion = "";
-            
-            var keyManager = helper.Data.ReadJsonFile<ApiKeyManager>("apiKeys.json");
-            if (keyManager == null)
-            {
-                throw new InvalidDataException("Failed to read apiKeys.json");
-            }
-            if (keyManager.openAI.Contains(' '))
-            {
-                throw new InvalidDataException("OpenAI API key has not been correctly entered in apiKeys.json. Please set this value");
-            }
+            var modVersion = Manifest.Inst?.Version ?? "";
 
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", keyManager.openAI);
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
         }
 

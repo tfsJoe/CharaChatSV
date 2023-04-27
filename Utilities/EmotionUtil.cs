@@ -10,7 +10,7 @@ namespace StardewChatter
     public static class EmotionUtil
     {
         /// <summary>Based on inspecting the spritesheets</summary>
-        public static IReadOnlyDictionary<string, IReadOnlyList<string>> CharacterEmotions =
+        private static IReadOnlyDictionary<string, IReadOnlyList<string>> CharacterEmotions =
             new Dictionary<string, IReadOnlyList<string>>
             {
                 {

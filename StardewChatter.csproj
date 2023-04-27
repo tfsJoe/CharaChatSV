@@ -10,34 +10,9 @@
   
   <!-- Normal resources -->
   <ItemGroup>
-    <EmbeddedResource Include="davinci-promptTemplate.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="turbo-promptTemplate.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="davinci-requestTemplate.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="turbo-requestTemplate.json">
+    <EmbeddedResource Include="assets/*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
   
-  <!-- Copies a dummy version of the API key for release builds. Use your real  -->
-  <Target Name="CopyAPIKey">
-    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-      <APIKey Include="$(ProjectDir)\apiKeys-secret.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        <DestinationRelativePath>apiKeys.json</DestinationRelativePath>
-      </APIKey>
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(Configuration)' == 'Release'">
-      <APIKey Include="$(ProjectDir)\apiKeys-dummy.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        <DestinationRelativePath>apiKeys.json</DestinationRelativePath>
-      </APIKey>
-    </ItemGroup>
-  </Target>
 </Project>
