@@ -32,11 +32,11 @@ namespace StardewChatter
         }
 
         public static void DrawPortrait(this NPC npc, SpriteBatch batch,
-            Emotion emotion = Emotion.Neutral, Rectangle? destinationRect = null)
+            string emotion = "neutral", Rectangle? destinationRect = null)
         {
             destinationRect ??= new Rectangle(Game1.viewport.Width - 256, 0, 128, 128);
             batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
-                sourceRectangle: PortraitUtil.EmotionToPortraitRect(emotion), Color.White);
+                sourceRectangle: PortraitUtil.EmotionToPortraitRect(npc, emotion), Color.White);
         }
         
         public static void DrawPortrait(this NPC npc, SpriteBatch batch,

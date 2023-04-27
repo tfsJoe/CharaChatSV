@@ -135,7 +135,8 @@ namespace StardewChatter
             chatApi.ReplySucceeded();
             npcReply = response.Reply;
             UpdateBalance(response.Balance);
-            curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
+            curEmotionSpriteRect =
+                PortraitUtil.EmotionToPortraitRect(interlocutor, PortraitUtil.ExtractEmotion(npcReply));
         }
         
         private async void UpdateOnResponse(string nextInput)
@@ -301,7 +302,7 @@ namespace StardewChatter
             textInput?.UnsubscribeAll(helper.Events);
             textInput?.Clear();
             npcReply = "";
-            curEmotionSpriteRect = PortraitUtil.EmotionToPortraitRect(Emotion.Neutral);
+            curEmotionSpriteRect = new Rectangle(0, 0,64, 64);
         }
 
         private static string GetSpinnerString()

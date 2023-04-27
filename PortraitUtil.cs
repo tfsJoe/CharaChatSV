@@ -1,82 +1,539 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Microsoft.Xna.Framework;
+using StardewValley;
 
 namespace StardewChatter
 {
     public static class PortraitUtil
     {
-        public static Rectangle EmotionStringToPortraitRect(string emotion)
-        {
-            switch (emotion)
+        /// <summary>Based on inspecting the spritesheets</summary>
+        public static IReadOnlyDictionary<string, IReadOnlyList<string>> CharacterEmotions =
+            new Dictionary<string, IReadOnlyList<string>>
             {
-				case "$h":
-					return new Rectangle(64, 0, 64, 64);
-				case "$s":
-					return new Rectangle(0, 64, 64, 64);
-				case "$u":
-					return new Rectangle(64, 64, 64, 64);
-				case "$l":
-					return new Rectangle(0, 128, 64, 64);
-				case "$a":
-					return new Rectangle(64, 128, 64, 64);
-				case "$k":
-				case "$neutral":
-				default:
-					return new Rectangle(0, 0, 64, 64);
-			}
-		}
+                {
+                    "Abigail", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Suspicious",
+                        "Love",
+                        "Angry",
+                        "Unimpressed",
+                        "Shocked",
+                        "(skip)",
+                        "Suspicious"
+                    }
+                },
+                {
+                    "Alex", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Playful",
+                        "Love",
+                        "Angry",
+                        "HulkingOut",
+                        "Shocked",
+                        "NakedAndSad",
+                        "Annoyed",
+                        "PiggingOut"
+                    }
+                },
+                {
+                    "Bear", new[]
+                    {
+                        "Neutral",
+                        "Embarrassed",
+                        "Satisfied",
+                        "Happy"
+                    }
+                },
+                {
+                    "Birdie", new[]
+                    {
+                        "Neutral",
+                        "Smrik",
+                        "Sad"
+                    }
+                },
+                {
+                    "Bouncer", new[]
+                    {
+                        "Neutral"
+                    }
+                },
+                {
+                    "Clint", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Annoyed",
+                        "Surprised",
+                        "Drinking"
+                    }
+                },
+                {
+                    "Demetrius", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Smirk",
+                        "Annoyed",
+                        "Inquisitive",
+                        "Surprised"
+                    }
+                },
+                {
+                    "Dobson", new[]
+                    {
+                        "Neutral",
+                        "Smug",
+                        "Concerned",
+                        "Happy"
+                    }
+                },
+                {
+                    "Dwarf", new[]
+                    {
+                        "Neutral"
+                    }
+                },
+                {
+                    "Elliott", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "(skip)",
+                        "Love",
+                        "Angry",
+                        "(skip)",
+                        "Unimpressed",
+                        "Shocked"
+                    }
+                },
+                {
+                    "Emily", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Attentive",
+                        "Love",
+                        "Angry",
+                        "Shocked",
+                        "Spiritual"
+                    }
+                },
+                {
+                    "Evelyn", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Wistful"
+                    }
+                },
+                {
+                    "George", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Angry"
+                    }
+                },
+                {
+                    "Gil", new[]
+                    {
+                        "Neutral"
+                    }
+                },
+                {
+                    "Governor", new[]
+                    {
+                        "Neutral",
+                        "Interested",
+                        "Unimpressed",
+                        "Sick"
+                    }
+                },
+                {
+                    "Grandpa", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad"
+                    }
+                },
+                {
+                    "Gunther", new[]
+                    {
+                        "Neutral"
+                    }
+                },
+                {
+                    "Gus", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Worried",
+                        "Unimpressed"
+                    }
+                },
+                {
+                    "Haley", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Uninterested",
+                        "Love",
+                        "Angry",
+                        "(skip)",
+                        "Probing",
+                        "Shocked",
+                        "(skip)",
+                        "(skip)",
+                        "Kissing"
+                    }
+                },
+                {
+                    "Harvey", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Concentrating",
+                        "Love",
+                        "Unimpressed",
+                        "(skip)",
+                        "Embarrassed",
+                        "Shocked"
+                    }
+                },
+                {
+                    "Henchman", new[]
+                    {
+                        "Neutral",
+                        "Lecherous",
+                        "Sad"
+                    }
+                },
+                {
+                    "Jas", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Impressed",
+                        "Explaining"
+                    }
+                },
+                {
+                    "Jodi", new[]
+                    {
+                        "Neutral",
+                        "Laughing",
+                        "Sad",
+                        "Annoyed",
+                        "Skeptical"
+                    }
+                },
+                {
+                    "Kent", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Unimpressed",
+                        "Irritated",
+                        "Shocked",
+                        "Exasperated"
+                    }
+                },
+                {
+                    "Krobus", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Surprised",
+                        "Love",
+                        "Angry",
+                        "Evil",
+                        "Cute",
+                        "Disguised"
+                    }
+                },
+                {
+                    "Leah", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Interested",
+                        "Love",
+                        "Annoyed",
+                        "Shocked",
+                        "Unimpressed"
+                    }
+                },
+                {
+                    "Lewis", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Annoyed",
+                        "Angry",
+                        "Exasperated"
+                    }
+                },
+                {
+                    "Linus", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Surprised"
+                    }
+                },
+                {
+                    "Marlon", new[]
+                    {
+                        "Neutral"
+                    }
+                },
+                {
+                    "Marnie", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Unimpressed",
+                        "Shocked"
+                    }
+                },
+                {
+                    "Maru", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Explaining",
+                        "Pleading",
+                        "Angry",
+                        "(skip)",
+                        "(skip)",
+                        "Attentive",
+                        "Shocked"
+                    }
+                },
+                {
+                    "Morris", new[]
+                    {
+                        "Neutral",
+                        "Smug",
+                        "Disheveled",
+                        "Annoyed"
+                    }
+                },
+                {
+                    "MrQi", new[]
+                    {
+                        "Happy",
+                        "Neutral"
+                    }
+                },
+                {
+                    "Pam", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Angry",
+                        "Unimpressed"
+                    }
+                },
+                {
+                    "ParrotBoy", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Embarrassed"
+                    }
+                },
+                {
+                    "Penny", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Shy",
+                        "Love",
+                        "Unimpressed",
+                        "(skip)",
+                        "(skip)",
+                        "(skip)",
+                        "Angry",
+                        "Crying",
+                        "Attentive"
+                    }
+                },
+                {
+                    "Pierre", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Angry",
+                        "Surprised"
+                    }
+                },
+                {
+                    "Robin", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Annoyed",
+                        "Flattered",
+                        "Uninterested",
+                        "Unimpressed"
+                    }
+                },
+                {
+                    "SafariGuy", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad"
+                    }
+                },
+                {
+                    "Sam", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "Pleased",
+                        "Love",
+                        "Skeptical",
+                        "(skip)",
+                        "Attentive",
+                        "Shocked",
+                        "Disappointed",
+                        "Bashful"
+                    }
+                },
+                {
+                    "Sandy", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Disappointed"
+                    }
+                },
+                {
+                    "Sebastian", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad",
+                        "(skip)",
+                        "Love",
+                        "Annoyed",
+                        "(skip)",
+                        "Mischievous"
+                    }
+                },
+                {
+                    "Shane", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Annoyed",
+                        "Resentful",
+                        "Love",
+                        "Angry",
+                        "Pleased",
+                        "Drunk",
+                        "(skip)",
+                        "(skip)",
+                        "Shocked"
+                    }
+                },
+                {
+                    "Vincent", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Sad"
+                    }
+                },
+                {
+                    "Willy", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        "Disappointed",
+                        "content"
+                    }
+                },
+                {
+                    "Wizard", new[]
+                    {
+                        "Neutral",
+                        "Happy",
+                        ""
+                    }
+                }
+            };
 
-		public static Rectangle EmotionToPortraitRect(Emotion emotion)
+        private static Rectangle IndexToRect(int index)
         {
-			string emoString;
-			switch (emotion)
-            {
-				case Emotion.Happy:
-					emoString = "$h";
-					break;
-				case Emotion.Sad:
-					emoString = "$s";
-					break;
-				case Emotion.Unique:
-					emoString = "$u";
-					break;
-				case Emotion.Love:
-					emoString = "$l";
-					break;
-				case Emotion.Angry:
-					emoString = "$a";
-					break;
-				case Emotion.Neutral:
-				default:
-					emoString = "$k";
-					break;
-			}
-			return EmotionStringToPortraitRect(emoString);
+            var x = index % 2 * 64;
+            var y = index / 2 * 64;
+            return new Rectangle(x, y, 64, 64);
         }
 
-		/// <summary>
-		/// Searches a string for a $-prefixed token denoting an emotion. Prioritizes more intense/unusual emotions.
-		/// Side effect: also strips all emotion tokens out of the input string.
-		/// </summary>
-		/// <returns>The Rectangle representing the emotion's coordinates in the character spritesheets.</returns>
-		public static Rectangle EmotionPortraitFromText(ref string text)
-		{
-			// Tokens are prioritized in case multiple are found. Unique is not used here.
-			var tokens = new string[] { "$a", "$s", "$l", "$h", "$k" };
-			var foundToken = tokens.FirstOrDefault(text.Contains);
-			if (string.IsNullOrEmpty(foundToken)) foundToken = "$k";
-			foreach (var token in tokens) text = text.Replace(token, "");
-			return EmotionStringToPortraitRect(foundToken);
-		}
-    }
-
-    public enum Emotion
-    {
-        Neutral,
-        Happy,
-        Sad,
-        Unique,
-        Love,
-        Angry,
+        public static Rectangle EmotionToPortraitRect(NPC npc, string emotion)
+        {
+            if (string.IsNullOrEmpty(emotion))
+                return new Rectangle(0, 0, 64, 64); // Hopefully first rect is neutral
+            
+            if (!CharacterEmotions.ContainsKey(npc.Name))
+            {
+                ModEntry.Log($"Don't know emotional range of NPC {npc.Name}");
+                return new Rectangle(0, 0, 64, 64); 
+            }
+            
+            var emotions = CharacterEmotions[npc.Name];
+            var index = -1;
+            for (var i = 0; i < emotions.Count; ++i)
+            {
+                if (!string.Equals(emotions[i].ToLower(), emotion.ToLower(),
+                        StringComparison.CurrentCultureIgnoreCase))
+                    continue;
+                index = i;
+                break;
+            }
+            ModEntry.Log($"{npc.Name} has emotion {emotion} at index {index}");
+            return IndexToRect(index);
+        }
+        
+        public static string ExtractEmotion(string text)
+        {
+            var match = Regex.Match(text, @"\$([a-zA-Z]+)");
+            return match.Success ? match.Groups[1].Value : null;
+        }
     }
 }
