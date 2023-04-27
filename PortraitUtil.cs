@@ -535,5 +535,10 @@ namespace StardewChatter
             var match = Regex.Match(text, @"\$([a-zA-Z]+)");
             return match.Success ? match.Groups[1].Value : null;
         }
+
+        public static IReadOnlyList<string> GetEmotionNames(this NPC npc)
+        {
+            return CharacterEmotions.ContainsKey(npc.Name) ? CharacterEmotions[npc.Name] : null;
+        }
     }
 }

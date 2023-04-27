@@ -116,6 +116,7 @@ namespace StardewChatter
             public string timeOfDay { get; set; }
             public string season { get; set; }
             public string loveInterest { get; set; }
+            public string[] emotions { get; set; }
 
             public PromptParams(NPC npc)
             {
@@ -136,6 +137,7 @@ namespace StardewChatter
                 dayNum = Game1.dayOfMonth;
                 season = Game1.currentSeason;
                 loveInterest = npc.loveInterest;
+                emotions = npc.GetEmotionNames().ToArray();
                 if (string.IsNullOrEmpty(loveInterest)) loveInterest = "";
                 relationshipStatus = !gotFriendship ? "strangers" :
                     friendship.IsMarried() ? "married" :
