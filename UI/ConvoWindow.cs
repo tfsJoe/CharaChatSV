@@ -12,10 +12,10 @@ namespace StardewChatter
 {
     internal class ConvoWindow : IClickableMenu
     {
-        private readonly IModHelper helper; //SMAPI helper, not Stardew-native
+        public readonly IModHelper helper; //SMAPI helper, not Stardew-native
         private readonly TextInput textInput;
         private readonly ErsatzButton clearButton, submitButton;
-        private readonly PopcornReportWidget popcornReport;
+        private readonly PopcornReportWidget popcornWidget;
         private int x, yTop, yBottom, w, hTop, hBottom;
 
         private NPC interlocutor;
@@ -80,6 +80,8 @@ namespace StardewChatter
         private Rectangle SubmitButtonRect => new Rectangle(w /2 + 8, ClearButtonRect.Y,
             192, 48);
 
+        public Point PopcornWidgetAnchor => new Point(PlayerTextRect.X, PlayerTextRect.Y + PlayerTextRect.Height + 24);
+
         private static readonly Rectangle CloseButtonSource = new Rectangle(338, 494, 11, 11);  // Examined spritesheet for vals
         private Rectangle CloseButtonRect => new Rectangle(PlayerTextRect.Width + PlayerTextRect.X + 25 , PlayerTextRect.Y - 25,
             CloseButtonSource.Width * 4, CloseButtonSource.Height * 4);
@@ -95,8 +97,7 @@ namespace StardewChatter
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear (tab)", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say (enter)", SubmitButtonRect, SubmitContent);
-            popcornReport = new PopcornReportWidget(helper,textBoxTexture, PlayerTextRect.X,
-                PlayerTextRect.Y + PlayerTextRect.Height);
+            popcornWidget = new PopcornReportWidget(this);
             chatApi = ChatFetcher.Instantiate(helper);
         }
 
@@ -136,7 +137,7 @@ namespace StardewChatter
         private void ShowReply(BackendResponse response)
         {
             chatApi.ReplySucceeded();
-            npcReply = response.Reply;
+            npcReply = ChatFetcher.SanitizeReply(response.Reply);
             UpdateBalance(response.Balance);
             curEmotionSpriteRect =
                 EmotionUtil.EmotionToPortraitRect(interlocutor, EmotionUtil.ExtractEmotion(ref npcReply));
@@ -190,6 +191,8 @@ namespace StardewChatter
                     textInput.UnlockAfterDelay();
                     break;
             }
+
+            popcornWidget.popcornCount = response.Balance;
             Status = Status.OpenDisplaying;
         }
 
@@ -209,8 +212,6 @@ namespace StardewChatter
             // b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yTop, w, hTop), Color.CadetBlue * 0.25f);
             // b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yBottom, w, hBottom), Color.Crimson * 0.25f);
 #endif
-            // Popcorn report
-            popcornReport.Draw(b);
             
             // Player input portion
             drawTextureBox(b, PlayerTextRect.X - HPadding, PlayerTextRect.Y - VPadding, 
@@ -219,6 +220,8 @@ namespace StardewChatter
             // NPC response portion
             drawTextureBox(b, NpcTextRect.X - HPadding, NpcTextRect.Y - VPadding, 
                 NpcTextRect.Width + HPadding * 2, NpcTextRect.Height + VPadding * 2, Color.White);
+            // Popcorn report
+            popcornWidget.Draw(b);
 
 #if DEBUG
             // b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
@@ -310,7 +313,7 @@ namespace StardewChatter
             curEmotionSpriteRect = new Rectangle(0, 0,64, 64);
         }
 
-        private static string GetSpinnerString()
+        public static string GetSpinnerString()
         {
             int dots = ((DateTime.Now.Millisecond / 200) % 5);
             switch (dots)

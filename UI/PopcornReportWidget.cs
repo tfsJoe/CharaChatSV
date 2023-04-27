@@ -1,34 +1,37 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
+using StardewValley;
 
 namespace StardewChatter
 {
-    public class PopcornReportWidget : IDrawable
+    internal class PopcornReportWidget : IDrawable
     {
-        private readonly IModHelper helper;
-        private readonly Texture2D boxTexture;
         private readonly Texture2D bagTexture;
-        private readonly Rectangle bagPlacement;
-        private int? popcornCount;
-        
-        private static readonly Rectangle EmptyBagRect = new Rectangle(0, 0, 64, 64);
-        private static readonly Rectangle FullBagRect = new Rectangle(64, 0, 64, 64);
+        private readonly ConvoWindow parent;
 
-        public PopcornReportWidget(IModHelper helper, Texture2D boxTexture, int xPos, int yPos)
+        public int? popcornCount;
+        
+        private static readonly Rectangle EmptyBagRect = new Rectangle(0, 0, 48, 48);
+        private static readonly Rectangle FullBagRect = new Rectangle(48, 0, 48, 48);
+        
+        private Rectangle BagDestination => new(parent.PopcornWidgetAnchor.X, parent.PopcornWidgetAnchor.Y, 96, 96);
+
+        public PopcornReportWidget(ConvoWindow parent)
         {
-            this.helper = helper;
-            this.boxTexture = boxTexture;
-            bagPlacement = new Rectangle(xPos, yPos, 128, 128);
-            bagTexture = helper.ModContent.Load<Texture2D>("assets/PopcornBag.png");
+            this.parent = parent;
+            bagTexture = parent.helper.ModContent.Load<Texture2D>("assets/PopcornBag.png");
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            var bagDest = BagDestination;
             var bagRect = popcornCount.HasValue ? 
                 (popcornCount > 10 ? FullBagRect : EmptyBagRect) :
                 EmptyBagRect;
-            spriteBatch.Draw(bagTexture, bagPlacement, bagRect, Color.White);
+            spriteBatch.Draw(bagTexture, bagDest, bagRect, Color.White);
+            var stringPlacement = new Vector2(bagDest.X + bagDest.Width + 16, bagDest.Y + 32);
+            spriteBatch.DrawString(Game1.dialogueFont, popcornCount?.ToString() ?? ConvoWindow.GetSpinnerString(), 
+                stringPlacement, Color.Moccasin);
         }
     }
 }

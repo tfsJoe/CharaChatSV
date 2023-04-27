@@ -133,12 +133,15 @@ namespace StardewChatter
         /// </summary>
         public virtual void ReplySucceeded() {}
 
-        protected virtual string SanitizeReply(string reply)
+        public static string SanitizeReply(string reply)
         {
             reply = Regex.Unescape(reply);
             if (reply.Length > 1 && reply[0] == ' ')
                 reply = reply.Substring(1, reply.Length - 1);
             reply = reply.Replace("@", ""); // AI sometimes uses @ before player char's name.
+            //AI also sometimes surrounds text with quotes.
+            if (reply.Length > 1 && reply[0] == '"' && reply[^1] == '"')
+                reply = reply.Substring(1, reply.Length - 2);
             return reply;
         }
     }
