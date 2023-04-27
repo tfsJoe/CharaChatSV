@@ -15,6 +15,7 @@ namespace StardewChatter
         private readonly IModHelper helper; //SMAPI helper, not Stardew-native
         private readonly TextInput textInput;
         private readonly ErsatzButton clearButton, submitButton;
+        private readonly PopcornReportWidget popcornReport;
         private int x, yTop, yBottom, w, hTop, hBottom;
 
         private NPC interlocutor;
@@ -94,6 +95,8 @@ namespace StardewChatter
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear (tab)", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say (enter)", SubmitButtonRect, SubmitContent);
+            popcornReport = new PopcornReportWidget(helper,textBoxTexture, PlayerTextRect.X,
+                PlayerTextRect.Y + PlayerTextRect.Height);
             chatApi = ChatFetcher.Instantiate(helper);
         }
 
@@ -206,6 +209,8 @@ namespace StardewChatter
             // b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yTop, w, hTop), Color.CadetBlue * 0.25f);
             // b.Draw(Game1.fadeToBlackRect, new Rectangle(x, yBottom, w, hBottom), Color.Crimson * 0.25f);
 #endif
+            // Popcorn report
+            popcornReport.Draw(b);
             
             // Player input portion
             drawTextureBox(b, PlayerTextRect.X - HPadding, PlayerTextRect.Y - VPadding, 

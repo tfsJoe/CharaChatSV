@@ -8,7 +8,7 @@ namespace StardewChatter
 {
     // I know the game already has buttons, perhaps via ClickableTextureComponent?
     // But I wasn't able to make sense of them quickly, and I figured I could get this up and running faster.
-    public class ErsatzButton
+    public class ErsatzButton : IDrawable
     {
         public Texture2D texture;
         public string label;
