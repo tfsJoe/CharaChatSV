@@ -15,18 +15,9 @@ namespace StardewChatter
 {
     public abstract class ChatFetcher
     {
-        protected readonly HttpClient client = new();
-
         protected abstract int RequestWaitTime { get; }
         protected abstract string CompletionsUrl { get; }
         protected static bool waitForRateLimit;
-
-        public ChatFetcher(IModHelper helper)
-        {
-            var modVersion = Manifest.Inst?.Version ?? "";
-
-            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
-        }
 
         public static ChatFetcher Instantiate(IModHelper helper)
         {
@@ -40,18 +31,18 @@ namespace StardewChatter
                         LogLevel.Alert);
                     // return new DaVinciFetcher(helper);
                     BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
-                    return new BackendFetcher(helper);
+                    return new BackendFetcher();
                 case "turbo":
                 case "default":
                     // return new TurboFetcher(helper);
                     BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
-                    return new BackendFetcher(helper);
+                    return new BackendFetcher();
                 default:
                     ModEntry.monitor.Log($"Did not understand AI model setting '{modelSetting}', using default.",
                         LogLevel.Warn);
                     // return new TurboFetcher(helper);
                     BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
-                    return new BackendFetcher(helper);
+                    return new BackendFetcher();
             }
         }
 
@@ -85,29 +76,21 @@ namespace StardewChatter
         
         protected async Task<HttpResponseMessage> SendChatRequest(object requestBody)
         {
-            if (requestBody == null) 
-                throw new ArgumentNullException(nameof(requestBody), "Must not be null");
-            string json;
-            var options = new JsonSerializerOptions
+            HttpRequestMessage request;
+            try
             {
-#if DEBUG
-                WriteIndented = true
-#endif
-            };
-            try { json = JsonSerializer.Serialize(requestBody, options); }
+                request = NetRequestUtil.RequestPostObjToUrl(requestBody, CompletionsUrl);
+            }
             catch (NotSupportedException)
             {
-                ModEntry.Log($"Couldn't serialize requestBody! {requestBody.GetType()} {requestBody}");
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
-            var requestPayload = new StringContent(json, Encoding.UTF8, "application/json" );
-            var request = new HttpRequestMessage(HttpMethod.Post, CompletionsUrl) {Content = requestPayload};
+
             ModEntry.Log(request.ToString());
-            ModEntry.Log($"(RequestBody)\n{json}");
             await RateLimit();
             waitForRateLimit = true;
             HttpResponseMessage httpResponse = null;
-            try {httpResponse = await client.SendAsync(request); }
+            try { httpResponse = await NetRequestUtil.Client.SendAsync(request); }
             catch (HttpRequestException e)
             {
                 httpResponse = new HttpResponseMessage()

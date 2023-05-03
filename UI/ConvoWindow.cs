@@ -24,27 +24,6 @@ namespace StardewChatter
         private readonly ChatFetcher chatApi;
         
         private Guid currentConvoId;
-        private Guid loginToken = Guid.Empty;
-
-        private Guid LoginToken
-        {
-            get
-            {
-                if (loginToken != Guid.Empty) return loginToken;
-                var tokenString = helper.Data.ReadGlobalData<string>("chatterLoginToken");
-                if (tokenString != null)
-                {
-                    ModEntry.Log($"Read login token: {tokenString}");
-                    loginToken = Guid.Parse(tokenString);
-                    return loginToken;
-                }
-                loginToken = Guid.NewGuid();
-                tokenString = loginToken.ToString();
-                helper.Data.WriteGlobalData("chatterLoginToken", tokenString);
-                ModEntry.Log($"Made new login token {tokenString}");
-                return loginToken;
-            }
-        }
 
         private Status status = Status.Closed;
         public Status Status
@@ -108,6 +87,9 @@ namespace StardewChatter
         /// <param name="npc">To which NPC is the player speaking?</param>
         public void StartConversation(NPC npc)
         {
+            CheckLoginState.Check(helper, true, (balance) => popcornWidget.popcornCount = balance)
+                .ConfigureAwait(false); // Suppress warning about not awaiting async method
+            
             if (npc == null)
             {
                 ModEntry.Log("Tried to start conversation with nobody.");
@@ -138,14 +120,14 @@ namespace StardewChatter
         {
             chatApi.ReplySucceeded();
             npcReply = ChatFetcher.SanitizeReply(response.Reply);
-            UpdateBalance(response.Balance);
             curEmotionSpriteRect =
                 EmotionUtil.EmotionToPortraitRect(interlocutor, EmotionUtil.ExtractEmotion(ref npcReply));
         }
         
         private async void UpdateOnResponse(string nextInput)
         {
-            var response = await chatApi.Chat(nextInput, LoginToken, currentConvoId);
+            var token = NetRequestUtil.GetLoginToken(helper);
+            var response = await chatApi.Chat(nextInput, token, currentConvoId);
             if (Status == Status.Closed) return;
             switch (response.Signal)
             {
@@ -196,12 +178,6 @@ namespace StardewChatter
             Status = Status.OpenDisplaying;
         }
 
-        void UpdateBalance(int? balance)
-        {
-            // TODO
-            ModEntry.Log($"Popcorn balance: {balance}");
-        }
-        
         public override void draw(SpriteBatch b)
         {
             base.draw(b);

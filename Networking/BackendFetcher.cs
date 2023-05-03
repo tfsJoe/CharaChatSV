@@ -12,14 +12,10 @@ namespace StardewChatter
     {
         public static AiModel aiModel;
         private PromptParams promptParams;
-        
-        public BackendFetcher(IModHelper helper) : base(helper)
-        {
-        }
 
         protected override int RequestWaitTime => 1500;
 
-        protected override string CompletionsUrl => Manifest.Inst.ApiUrl;
+        protected override string CompletionsUrl => Manifest.Inst.ApiRoot + "/stardewChat";
         
         public override void SetUpChat(NPC npc)
         {

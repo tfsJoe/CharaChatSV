@@ -7,7 +7,7 @@ using StardewValley;
 
 namespace StardewChatter
 {
-    public static class EmotionUtil
+    internal static class EmotionUtil
     {
         /// <summary>Based on inspecting the spritesheets</summary>
         private static IReadOnlyDictionary<string, IReadOnlyList<string>> CharacterEmotions =
