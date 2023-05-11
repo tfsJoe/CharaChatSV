@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using StardewValley;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     internal static class EmotionUtil
     {

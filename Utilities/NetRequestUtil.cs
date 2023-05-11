@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using StardewModdingAPI;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     internal static class NetRequestUtil
     {
@@ -19,7 +19,7 @@ namespace StardewChatter
                 if (client != null) return client;
                 client = new HttpClient();
                 var modVersion = Manifest.Inst?.Version ?? "";
-                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CharaChatSV", modVersion));
                 return client;
             }
         }

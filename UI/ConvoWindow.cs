@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     internal class ConvoWindow : IClickableMenu
     {

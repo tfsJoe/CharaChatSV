@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     internal class PopcornReportWidget : IDrawable
     {

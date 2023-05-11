@@ -9,7 +9,7 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public static class Extensions
     {

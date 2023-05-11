@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using StardewModdingAPI;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     internal enum LoginState
     {

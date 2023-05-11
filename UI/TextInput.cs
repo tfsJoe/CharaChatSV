@@ -13,7 +13,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public class TextInput : IKeyboardSubscriber
     {

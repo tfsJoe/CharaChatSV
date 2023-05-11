@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public abstract class ChatFetcher
     {
@@ -21,7 +21,6 @@ namespace StardewChatter
 
         public static ChatFetcher Instantiate(IModHelper helper)
         {
-            ModEntry.Log($"StardewChatter version: {Manifest.Inst.Version}");
             var modelSetting = Manifest.Inst?.AiModel;
             switch (modelSetting)
             {

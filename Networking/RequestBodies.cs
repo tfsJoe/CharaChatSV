@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     /* The props are defined by the parameters of the API endpoints, which may differ depending on which model is used.
      See https://platform.openai.com/docs/guides/chat/introduction

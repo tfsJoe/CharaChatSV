@@ -1,6 +1,6 @@
 ﻿using StardewModdingAPI;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     /// <summary>Data class for parsing manifest.json</summary>
     internal class Manifest

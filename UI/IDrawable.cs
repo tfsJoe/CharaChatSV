@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public interface IDrawable
     {
