@@ -26,7 +26,7 @@ namespace CharaChatSV
             {
                 case "davinci":
                     ModEntry.monitor.Log($"This AI setting will use your credits around 10x faster! \n" +
-                                         $"Recommended to use 'turbo'. Set in manifest.json file.",
+                                         $"Recommended to use 'default'. Set in manifest.json file.",
                         LogLevel.Alert);
                     // return new DaVinciFetcher(helper);
                     BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;

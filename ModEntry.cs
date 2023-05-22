@@ -13,7 +13,7 @@ namespace CharaChatSV
     /// <summary>The mod entry point.</summary>
     internal sealed class ModEntry : Mod
     {
-        public static IMonitor monitor;
+        public static IMonitor monitor { get; private set; }
 
         public static string ModDirectory
         {
