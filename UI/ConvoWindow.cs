@@ -163,10 +163,10 @@ namespace CharaChatSV
                     break;
                 case ResponseSignal.obsolete:
                     Status = Status.Closed;
-                    Game1.drawObjectDialogue("Please update Stardew Chatter to chat with NPCs. Opening in browser...");
+                    Game1.drawObjectDialogue("Please update Chara.Chat mod to chat with NPCs. Opening in browser...");
                     await Task.Delay(3000);
                     // TODO: open mod page instead
-                    Extensions.OpenUrl("https://starchatter.netlify.app/");
+                    Extensions.OpenUrl(Manifest.Inst.WebRoot);
                     break;
                 case ResponseSignal.unknown:
                     npcReply = response.Reply;  // Expected to contain error message
