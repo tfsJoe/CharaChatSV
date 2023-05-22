@@ -42,6 +42,7 @@ namespace CharaChatSV
             {
                 case "revoked":
                     state = LoginState.revoked;
+                    token = NetRequestUtil.RefreshLoginToken(helper);
                     break;
                 case "noRecord":
                     state = LoginState.noRecord;
