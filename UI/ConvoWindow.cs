@@ -141,7 +141,7 @@ namespace CharaChatSV
                     textInput.clearOnNextInput = false;
                     await Task.Delay(3000);
                     if (Status != Status.Closed)
-                        Extensions.OpenUrl("https://starchatter.netlify.app/shop");
+                        Extensions.OpenUrl($"{Manifest.Inst.WebRoot}/buy");
                     break;
                 case ResponseSignal.moderated:
                     Status = Status.Closed;

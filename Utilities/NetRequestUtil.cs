@@ -29,7 +29,7 @@ namespace CharaChatSV
         public static Guid GetLoginToken(IModHelper helper)
         {
             if (cachedLoginToken != Guid.Empty) return cachedLoginToken;
-            var tokenString = helper.Data.ReadGlobalData<string>("chatterLoginToken");
+            var tokenString = helper.Data.ReadGlobalData<string>("charachatlogintoken");
             if (tokenString != null)
             {
                 ModEntry.Log($"Read login token: {tokenString}");
@@ -38,7 +38,7 @@ namespace CharaChatSV
             }
             cachedLoginToken = Guid.NewGuid();
             tokenString = cachedLoginToken.ToString();
-            helper.Data.WriteGlobalData("chatterLoginToken", tokenString);
+            helper.Data.WriteGlobalData("charachatlogintoken", tokenString);
             ModEntry.Log($"Made new login token {tokenString}");
             return cachedLoginToken;
         }
