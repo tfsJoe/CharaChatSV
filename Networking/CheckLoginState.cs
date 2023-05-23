@@ -62,10 +62,11 @@ namespace CharaChatSV
 
             if (openAuthPage && state != LoginState.authorized)
             {
-                ModEntry.Log($"Opening auth page: {Manifest.Inst.WebRoot}/authorize?t={token}");
+                var encryptedToken = await Security.TokenEncryptor.GetEncryptedToken(token.ToString());
+                ModEntry.Log($"Opening auth page: {Manifest.Inst.WebRoot}/authorize?t={encryptedToken}");
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = $"{Manifest.Inst.WebRoot}/authorize?t={token}",
+                    FileName = $"{Manifest.Inst.WebRoot}/authorize?t={encryptedToken}",
                     UseShellExecute = true,
                     Verb = "open"
                 };
