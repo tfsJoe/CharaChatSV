@@ -206,7 +206,7 @@ namespace CharaChatSV
             switch (status)
             {
                 case Status.OpenInit:
-                    b.DrawWordWrappedText($"(Say something to {interlocutor?.Name})",
+                    b.DrawWordWrappedText($"(Say something to {interlocutor?.displayName})",
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenWaiting:
