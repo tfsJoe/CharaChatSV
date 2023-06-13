@@ -5,7 +5,6 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CharaChatSV
@@ -87,15 +86,15 @@ namespace CharaChatSV
         /// <param name="npc">To which NPC is the player speaking?</param>
         public void StartConversation(NPC npc)
         {
-            CheckLoginState.Check(helper, true, (balance) => popcornWidget.popcornCount = balance)
-                .ConfigureAwait(false); // Suppress warning about not awaiting async method
-            
             if (npc == null)
             {
                 ModEntry.Log("Tried to start conversation with nobody.");
                 Status = Status.Closed;
                 return;
             }
+            
+            CheckLoginState.Check(helper, true, (balance) => popcornWidget.popcornCount = balance)
+                .ConfigureAwait(false); // Suppress warning about not awaiting async method
 
             currentConvoId = Guid.NewGuid();
             ModEntry.Log($"New chat ID: {currentConvoId}");
@@ -166,7 +165,7 @@ namespace CharaChatSV
                     Game1.drawObjectDialogue("Please update Chara.Chat mod to chat with NPCs. Opening in browser...");
                     await Task.Delay(3000);
                     // TODO: open mod page instead
-                    Extensions.OpenUrl(Manifest.Inst.WebRoot);
+                    Extensions.OpenUrl(Manifest.Inst.WebRoot + "/svModDownload");
                     break;
                 case ResponseSignal.unknown:
                     npcReply = response.Reply;  // Expected to contain error message

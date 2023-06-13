@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
-using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
+using StardewValley.Characters;
 
 namespace CharaChatSV
 {
@@ -27,8 +24,22 @@ namespace CharaChatSV
 
         public static bool CanChat(this NPC npc)
         {
+            bool tooYoung = false;
+            if (npc is Child child)
+            {
+                tooYoung = child.daysOld.Value < 57;
+            }
+
+            bool needsKiss = false;
+            if (npc.Name == Game1.player.spouse)
+            {
+                needsKiss = !npc.hasBeenKissedToday.Value;
+            }
+
             return Game1.player.ActiveObject == null &&
-                   npc.IsInConvoRange() && npc.IsDialogueEmpty();
+                   npc.IsInConvoRange() && npc.IsDialogueEmpty() &&
+                   !npc.IsMonster && npc is not Pet &&
+                   !tooYoung && !needsKiss;
         }
 
         public static void DrawPortrait(this NPC npc, SpriteBatch batch,
@@ -38,22 +49,22 @@ namespace CharaChatSV
             batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
                 sourceRectangle: EmotionUtil.EmotionToPortraitRect(npc, emotion), Color.White);
         }
-        
+
         public static void DrawPortrait(this NPC npc, SpriteBatch batch,
             Rectangle emotionSourceRect, Rectangle? destinationRect = null)
         {
+            if (npc.Portrait == null) return;
             destinationRect ??= new Rectangle(Game1.viewport.Width - 256, 0, 128, 128);
             batch.Draw(texture: npc.Portrait, destinationRectangle: destinationRect.Value,
                 sourceRectangle: emotionSourceRect, Color.White);
         }
-        
-        
+
 
         /// <summary>
         /// Accepts a string and splits it into multiple lines based on the width of the box
         /// and the horizontal size of the font.
         /// </summary>
-        static List<string> GetWordWrappedLines(this SpriteFont font, string text, int lineWidth)
+        private static List<string> GetWordWrappedLines(this SpriteFont font, string text, int lineWidth)
         {
             var lines = new List<string>();
             var line = "";
@@ -69,6 +80,7 @@ namespace CharaChatSV
 
                 line += word + " ";
             }
+
             lines.Add(line);
             return lines;
         }
@@ -86,7 +98,7 @@ namespace CharaChatSV
             }
         }
 
-        public static void DrawAndTruncateWordWrappedText(this SpriteBatch spriteBatch, ref string text, 
+        public static void DrawAndTruncateWordWrappedText(this SpriteBatch spriteBatch, ref string text,
             Rectangle box, SpriteFont font, Color color)
         {
             var lines = font.GetWordWrappedLines(text, box.Width);
@@ -99,6 +111,7 @@ namespace CharaChatSV
                     text = string.Join("", lines.GetRange(0, i));
                     return;
                 }
+
                 Utility.drawTextWithShadow(spriteBatch, lines[i], font, new Vector2(box.X, y), color);
                 y += font.LineSpacing;
             }
@@ -119,7 +132,7 @@ namespace CharaChatSV
         {
             return new Vector2(point.X, point.Y);
         }
-        
+
         // From https://stackoverflow.com/questions/4580263/how-to-open-in-default-browser-in-c-sharp
         public static void OpenUrl(string url)
         {

@@ -19,6 +19,7 @@ namespace CharaChatSV
         
         public override void SetUpChat(NPC npc)
         {
+            ModEntry.Log($"NPC null? {npc == null}");
             promptParams = new PromptParams(npc);
         }
 
@@ -133,7 +134,7 @@ namespace CharaChatSV
                 dayNum = Game1.dayOfMonth;
                 season = Game1.currentSeason;
                 loveInterest = npc.loveInterest;
-                emotions = npc.GetEmotionNames().ToArray();
+                emotions = npc.GetEmotionNames()?.ToArray();
                 if (string.IsNullOrEmpty(loveInterest)) loveInterest = "";
                 relationshipStatus = !gotFriendship ? "strangers" :
                     friendship.IsMarried() ? "married" :
