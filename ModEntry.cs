@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 
 namespace CharaChatSV
@@ -57,6 +54,15 @@ namespace CharaChatSV
             {
                 case SButton.H:
                     convoWindow.StartConversation(Game1.getCharacterFromName("Haley"));
+                    return;
+                case SButton.I:
+                    var children = Game1.player.getChildren();
+                    foreach (var child in children)
+                    {
+                        Log($"Child {child.Name} is {child.daysOld.Value} days old. Kissed today? {child.hasBeenKissedToday}");
+                    }
+                    if (children.Count > 0)
+                        convoWindow.StartConversation(Game1.player.getChildren()[0]);
                     return;
             }
 #endif

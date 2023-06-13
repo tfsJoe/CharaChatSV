@@ -22,10 +22,27 @@ namespace CharaChatSV
             return npc.CurrentDialogue == null || npc.CurrentDialogue.Count == 0;
         }
 
+        private static List<Child> playerChildren = null;
+        /* Possible minor bug: if the player has a new child and plays through without stopping until it
+        is 57 days old, it will not be included in this list and the mod could prevent the player from
+        kissing the child. The alternatives are: logic to refresh this list when a child is born (cumbersome)
+        or checking the children list every time the player right clicks (inefficient,)
+        so I am ok with this for now. */
+        private static List<Child> PlayerChildren
+        {
+            get
+            {
+                if (playerChildren != null) return playerChildren;
+                playerChildren = Game1.player.getChildren();
+                return playerChildren;
+            }
+        }
+
         public static bool CanChat(this NPC npc)
         {
+            var child = npc as Child;
             bool tooYoung = false;
-            if (npc is Child child)
+            if (child != null)
             {
                 tooYoung = child.daysOld.Value < 57;
             }
@@ -34,6 +51,11 @@ namespace CharaChatSV
             if (npc.Name == Game1.player.spouse)
             {
                 needsKiss = !npc.hasBeenKissedToday.Value;
+            }
+
+            if (!tooYoung && child != null && PlayerChildren.Contains(child))
+            {
+                needsKiss = !Game1.player.hasTalkedToFriendToday(child.Name);
             }
 
             return Game1.player.ActiveObject == null &&
