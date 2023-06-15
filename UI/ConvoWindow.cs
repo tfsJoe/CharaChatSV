@@ -16,6 +16,7 @@ namespace CharaChatSV
         private readonly ErsatzButton clearButton, submitButton;
         private readonly PopcornReportWidget popcornWidget;
         private int x, yTop, yBottom, w, hTop, hBottom;
+        private float cachedZoom = 1f;
 
         private NPC interlocutor;
         private Rectangle? curEmotionSpriteRect;
@@ -36,6 +37,7 @@ namespace CharaChatSV
                     // ModEntry.Log("Closing ConvoWindow.");
                     Game1.playSound("bigDeSelect");
                     Reset();
+                    Game1.options.desiredBaseZoomLevel = cachedZoom;
                     Game1.activeClickableMenu = null;
                 }
                 else
@@ -103,6 +105,10 @@ namespace CharaChatSV
             Status = Status.OpenInit;
             chatApi.SetUpChat(npc);
             textInput.lockout = false;
+
+            cachedZoom = Game1.options.desiredBaseZoomLevel;
+            Game1.options.desiredBaseZoomLevel = 1f;
+
             Game1.activeClickableMenu = this;
             Game1.playSound("bigSelect");
         }
