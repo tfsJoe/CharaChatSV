@@ -114,6 +114,11 @@ namespace CharaChatSV
             public string season { get; set; }
             public string loveInterest { get; set; }
             public string[] emotions { get; set; }
+            public string spouse { get; set; }
+            public string engaged { get; set; }
+            public string[] children { get; set; }
+            public string[] dating { get; set; }
+            public string[] exes { get; set; }
 
             public PromptParams(NPC npc)
             {
@@ -136,6 +141,18 @@ namespace CharaChatSV
                 loveInterest = npc.loveInterest;
                 emotions = npc.GetEmotionNames()?.ToArray();
                 if (string.IsNullOrEmpty(loveInterest)) loveInterest = "";
+                spouse = Game1.player.isMarried() ? Game1.player.spouse : null;
+                engaged = Game1.player.isEngaged() ? Game1.player.spouse : null;
+                children = Game1.player.getChildren().Select(c => 
+                    $"{c.Name} ({(c.Gender == 0 ? "son" : "daughter")})").ToArray();
+                dating = GameplayUtil.GetAllCharacters().Where(c =>
+                    Game1.player.friendshipData.ContainsKey(c.Name) &&
+                    Game1.player.friendshipData[c.Name].Status == FriendshipStatus.Dating)
+                    .Select(lover => lover.Name).ToArray();
+                exes = GameplayUtil.GetAllCharacters().Where(c =>
+                    Game1.player.friendshipData.ContainsKey(c.Name) &&
+                    Game1.player.friendshipData[c.Name].IsDivorced())
+                    .Select(ex => ex.Name).ToArray();
                 relationshipStatus = !gotFriendship ? "strangers" :
                     friendship.IsMarried() ? "married" :
                     friendship.IsDating() ? "dating" :
