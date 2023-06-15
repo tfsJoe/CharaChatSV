@@ -8,6 +8,6 @@
 	"MinimumApiVersion": "3.0.0",
 	"UpdateKeys": [],
 	"AiModel" : "default",
-	"WebRoot": "http://localhost:8888",
-	"ApiRoot": "http://localhost:8888/api"
+	"WebRoot": "https://chara.chat",
+	"ApiRoot": "https://chara.chat/api"
 }
