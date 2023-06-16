@@ -21,28 +21,10 @@ namespace CharaChatSV
 
         public static ChatFetcher Instantiate(IModHelper helper)
         {
-            var modelSetting = Manifest.Inst?.AiModel;
-            switch (modelSetting)
-            {
-                case "davinci":
-                    ModEntry.monitor.Log($"This AI setting will use your credits around 10x faster! \n" +
-                                         $"Recommended to use 'default'. Set in manifest.json file.",
-                        LogLevel.Alert);
-                    // return new DaVinciFetcher(helper);
-                    BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
-                    return new BackendFetcher();
-                case "turbo":
-                case "default":
-                    // return new TurboFetcher(helper);
-                    BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
-                    return new BackendFetcher();
-                default:
-                    ModEntry.monitor.Log($"Did not understand AI model setting '{modelSetting}', using default.",
-                        LogLevel.Warn);
-                    // return new TurboFetcher(helper);
-                    BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
-                    return new BackendFetcher();
-            }
+            /* There used to be several subclasses (one for each AI model) but since we always go through the
+             backend now, this is no longer needed, and there's no need to decide in this factory method.
+             The AI model setting is a static member of BackendFetcher now.*/
+            return new BackendFetcher();
         }
 
         public abstract void SetUpChat(NPC npc);

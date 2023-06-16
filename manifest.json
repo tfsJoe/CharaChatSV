@@ -1,13 +1,12 @@
 {
 	"Name": "CharaChatSV",
 	"Author": "Man of Corn",
-	"Version": "1.0.0",
+	"Version": "1.0.1",
 	"Description": "Deeper conversations with the other inhabitants of Stardew Valley",
 	"UniqueID": "ManOfCorn.CharaChatSV",
 	"EntryDll": "CharaChatSV.dll",
 	"MinimumApiVersion": "3.0.0",
 	"UpdateKeys": [],
-	"AiModel" : "default",
 	"WebRoot": "https://chara.chat",
 	"ApiRoot": "https://chara.chat/api"
 }

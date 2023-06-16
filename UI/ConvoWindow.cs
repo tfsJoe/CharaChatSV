@@ -15,6 +15,7 @@ namespace CharaChatSV
         private readonly TextInput textInput;
         private readonly ErsatzButton clearButton, submitButton;
         private readonly PopcornReportWidget popcornWidget;
+        private readonly SettingsWidget settingsWidget;
         private int x, yTop, yBottom, w, hTop, hBottom;
         private float cachedZoom = 1f;
 
@@ -61,6 +62,7 @@ namespace CharaChatSV
             192, 48);
 
         public Point PopcornWidgetAnchor => new Point(PlayerTextRect.X, PlayerTextRect.Y + PlayerTextRect.Height + 24);
+        public Point SettingsWidgetAnchor => new Point(SubmitButtonRect.Right + 32, SubmitButtonRect.Top);
 
         private static readonly Rectangle CloseButtonSource = new Rectangle(338, 494, 11, 11);  // Examined spritesheet for vals
         private Rectangle CloseButtonRect => new Rectangle(PlayerTextRect.Width + PlayerTextRect.X + 25 , PlayerTextRect.Y - 25,
@@ -78,6 +80,7 @@ namespace CharaChatSV
             clearButton = new ErsatzButton(textBoxTexture, "Clear (tab)", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say (enter)", SubmitButtonRect, SubmitContent);
             popcornWidget = new PopcornReportWidget(this);
+            settingsWidget = new SettingsWidget(this, textBoxTexture);
             chatApi = ChatFetcher.Instantiate(helper);
         }
 
@@ -203,6 +206,8 @@ namespace CharaChatSV
                 NpcTextRect.Width + HPadding * 2, NpcTextRect.Height + VPadding * 2, Color.White);
             // Popcorn report
             popcornWidget.Draw(b);
+            // Settings button
+            settingsWidget.Draw(b);
 
 #if DEBUG
             // b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
@@ -255,7 +260,7 @@ namespace CharaChatSV
                 clearButton.DetectClick(x, y);
                 submitButton.DetectClick(x, y);
             }
-
+            settingsWidget.DetectClick(x, y);
             DetectCloseButtonClick(x, y);
         }
 
