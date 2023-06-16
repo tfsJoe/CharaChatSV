@@ -39,6 +39,7 @@ namespace CharaChatSV
                     Game1.playSound("bigDeSelect");
                     Reset();
                     Game1.options.desiredBaseZoomLevel = cachedZoom;
+                    settingsWidget.isOpen = false;
                     Game1.activeClickableMenu = null;
                 }
                 else

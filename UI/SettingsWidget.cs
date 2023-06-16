@@ -6,16 +6,13 @@ namespace CharaChatSV
 {
     internal class SettingsWidget : IDrawable, IClickableElement
     {
+        public bool isOpen;
         private readonly ConvoWindow parent;
-        private bool isOpen;
         private const int IconSize = 48;
         private readonly ErsatzButton budgetQualityButton;
         private readonly ErsatzButton highQualityButton;
         
         private static readonly Rectangle IconSource = new Rectangle(367, 373, 16,16);
-        private static readonly Rectangle EmptyBoxSource = new Rectangle(510, 668, 9, 9);
-        private static readonly Rectangle BoxFillSource = new Rectangle(237, 725, 10, 7); //flip
-        
 
         private Rectangle IconDestination =>
             new Rectangle(parent.SettingsWidgetAnchor.X, parent.SettingsWidgetAnchor.Y, IconSize, IconSize);
@@ -68,18 +65,25 @@ namespace CharaChatSV
             BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
         }
 
-        public void DetectClick(int x, int y)
+        public bool DetectClick(int x, int y)
         {
+            var result = false;
+            
             if (IconDestination.Contains(x, y))
             {
                 isOpen = !isOpen;
+                result = true;
             }
 
             if (isOpen)
             {
-                budgetQualityButton.DetectClick(x, y);
-                highQualityButton.DetectClick(x, y);
+                result = result || budgetQualityButton.DetectClick(x, y);
+                result = result || highQualityButton.DetectClick(x, y);
             }
+
+            if (!result) isOpen = false;    // Close when clicking elsewhere
+
+            return result;
         }
     }
 }

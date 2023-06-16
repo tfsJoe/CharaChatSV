@@ -4,6 +4,6 @@ namespace CharaChatSV
 {
     public interface IClickableElement
     {
-        public void DetectClick(int x, int y);
+        public bool DetectClick(int x, int y);
     }
 }

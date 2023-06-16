@@ -26,10 +26,12 @@ namespace CharaChatSV
             this.textColor = textColor ?? DefaultColor;
         }
         
-        public void DetectClick(int x, int y)
+        public bool DetectClick(int x, int y)
         {
-            if (onClick != null && rect.Contains(x, y))
+            var clicked = rect.Contains(x, y);
+            if (clicked && onClick != null)
                 onClick.Invoke();
+            return clicked;
         }
 
         public void Draw(SpriteBatch spriteBatch)
