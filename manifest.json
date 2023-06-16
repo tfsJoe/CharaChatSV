@@ -6,7 +6,7 @@
 	"UniqueID": "ManOfCorn.CharaChatSV",
 	"EntryDll": "CharaChatSV.dll",
 	"MinimumApiVersion": "3.0.0",
-	"UpdateKeys": [],
+	"UpdateKeys": ["Nexus:16808"],
 	"WebRoot": "https://chara.chat",
 	"ApiRoot": "https://chara.chat/api"
 }
