@@ -57,12 +57,16 @@ namespace CharaChatSV
         {
             ModEntry.Log("Budget quality");
             BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
+            UserSettings.Inst.AiQuality = "budget";
+            UserSettings.Write();
         }
         
         private static void SetDaVinci()
         {
             ModEntry.Log("High quality");
             BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
+            UserSettings.Inst.AiQuality = "high";
+            UserSettings.Write();
         }
 
         public bool DetectClick(int x, int y)

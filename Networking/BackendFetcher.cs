@@ -16,6 +16,13 @@ namespace CharaChatSV
         protected override int RequestWaitTime => 1500;
 
         protected override string CompletionsUrl => Manifest.Inst.ApiRoot + "/stardewChat";
+
+        public BackendFetcher()
+        {
+            UserSettings.Read();
+            aiModel = UserSettings.Inst?.AiQuality?.ToLower() == "high" ?
+                AiModel.davinci : AiModel.turbo;
+        }
         
         public override void SetUpChat(NPC npc)
         {

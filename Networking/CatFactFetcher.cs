@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace CharaChatSV
 {
+#if DEBUG
     public class CatFactFetcher
     {
         private const string catFactsUrl = "https://catfact.ninja/fact?max_length=512";
@@ -44,4 +45,5 @@ namespace CharaChatSV
             return fact;
         }
     }
+#endif
 }

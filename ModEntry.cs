@@ -11,6 +11,7 @@ namespace CharaChatSV
     internal sealed class ModEntry : Mod
     {
         public static IMonitor monitor { get; private set; }
+        public static IModHelper modHelper { get; private set; }
 
         public static string ModDirectory
         {
@@ -25,6 +26,7 @@ namespace CharaChatSV
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
+            modHelper = helper;
             Manifest.Init(helper);
             ModDirectory = helper.DirectoryPath;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
