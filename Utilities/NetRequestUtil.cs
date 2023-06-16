@@ -11,7 +11,6 @@ namespace CharaChatSV
     internal static class NetRequestUtil
     {
         private static HttpClient client;
-        private const string LoginTokenFilename = "charachatlogintoken";
 
         public static HttpClient Client
         {
@@ -30,7 +29,7 @@ namespace CharaChatSV
         public static Guid GetLoginToken(IModHelper helper)
         {
             if (cachedLoginToken != Guid.Empty) return cachedLoginToken;
-            var tokenString = helper.Data.ReadGlobalData<string>(LoginTokenFilename);
+            var tokenString = UserSettings.Inst.LoginToken;
             if (tokenString != null)
             {
                 ModEntry.Log($"Read login token: {tokenString}");
@@ -44,7 +43,8 @@ namespace CharaChatSV
         {
             cachedLoginToken = Guid.NewGuid();
             var tokenString = cachedLoginToken.ToString();
-            helper.Data.WriteGlobalData(LoginTokenFilename, tokenString);
+            UserSettings.Inst.LoginToken = tokenString;
+            UserSettings.Write();
             ModEntry.Log($"Made new login token {tokenString}");
             return cachedLoginToken;
         }
