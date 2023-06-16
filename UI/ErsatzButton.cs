@@ -15,6 +15,7 @@ namespace CharaChatSV
         public Rectangle rect;
         public event Action onClick;
         public Color textColor;
+        public static readonly Color DefaultColor = new Color(0x20, 0x10, 0x10, 0xFF); 
 
         public ErsatzButton(Texture2D texture, string label, Rectangle rect, Action onClick, Color? textColor = null)
         {
@@ -22,7 +23,7 @@ namespace CharaChatSV
             this.label = label;
             this.rect = rect;
             this.onClick += onClick;
-            this.textColor = textColor ?? new Color(0x20, 0x10, 0x10, 0xFF);
+            this.textColor = textColor ?? DefaultColor;
         }
         
         public void DetectClick(int x, int y)

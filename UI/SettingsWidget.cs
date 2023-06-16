@@ -33,52 +33,39 @@ namespace CharaChatSV
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(Game1.mouseCursors, IconDestination, IconSource, isOpen ? Color.LightGray : Color.White);
-            if (!isOpen)
+            Color iconColor;
+            if (isOpen)
             {
-                spriteBatch.DrawString(Game1.smallFont, "Quality", 
-                    new Vector2(IconDestination.X, IconDestination.Y + IconSize), Color.DarkGray * 0.85f);   
+                budgetQualityButton.textColor = BackendFetcher.aiModel != BackendFetcher.AiModel.davinci
+                    ? ErsatzButton.DefaultColor
+                    : ErsatzButton.DefaultColor * 0.5f;
+                highQualityButton.textColor = BackendFetcher.aiModel == BackendFetcher.AiModel.davinci
+                    ? ErsatzButton.DefaultColor
+                    : ErsatzButton.DefaultColor * 0.5f;
+                budgetQualityButton.Draw(spriteBatch);
+                highQualityButton.Draw(spriteBatch);
+                iconColor = Color.LightGray;
             }
             else
             {
-                budgetQualityButton.Draw(spriteBatch);
-                highQualityButton.Draw(spriteBatch);
+                spriteBatch.DrawString(Game1.smallFont, "Quality",
+                    new Vector2(IconDestination.X + IconSize + 2, IconDestination.Y), Color.DarkGray * 0.85f);
+                iconColor = BackendFetcher.aiModel == BackendFetcher.AiModel.davinci ? Color.LightSalmon : Color.White;
             }
-#if DEBUG
-            // if (isOpen)
-            // {
-            //     spriteBatch.Draw(Game1.fadeToBlackRect, new Rectangle(IconDestination.Right, IconDestination.Top,
-            //         160, IconSize), Color.Chartreuse * 0.25f);
-            //     spriteBatch.Draw(Game1.fadeToBlackRect, new Rectangle(IconDestination.Right, IconDestination.Top + IconSize,
-            //         160, IconSize), Color.LightSalmon * 0.25f);
-            // }
-#endif
-            if (isOpen)
-            {
-                // spriteBatch.Draw(Game1.mouseCursors, 
-                //     new Rectangle(IconDestination.Right + 1, IconDestination.Top, 
-                //         Game1.smallFont.LineSpacing, Game1.smallFont.LineSpacing),
-                //     EmptyBoxSource, Color.White);
-                // spriteBatch.Draw(Game1.mouseCursors, 
-                //     new Rectangle(IconDestination.Right + 1, IconDestination.Top + Game1.smallFont.LineSpacing,
-                //         Game1.smallFont.LineSpacing, Game1.smallFont.LineSpacing),
-                //     EmptyBoxSource, Color.White);
-                // spriteBatch.DrawString(Game1.smallFont, "Budget", new Vector2( IconDestination.Right + EmptyBoxSource.Width + 2,
-                //     IconDestination.Top), Color.DarkGray);
-                // spriteBatch.DrawString(Game1.smallFont, "High", new Vector2( IconDestination.Right + EmptyBoxSource.Width + 2,
-                //     IconDestination.Top + Game1.smallFont.LineSpacing + 2), Color.DarkGray);
-                
-            }
+
+            spriteBatch.Draw(Game1.mouseCursors, IconDestination, IconSource, iconColor);
         }
 
-        private void SetTurbo()
+        private static void SetTurbo()
         {
-            ModEntry.Log("Set turbo");
+            ModEntry.Log("Budget quality");
+            BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
         }
         
-        private void SetDaVinci()
+        private static void SetDaVinci()
         {
-            ModEntry.Log("Set davinci");
+            ModEntry.Log("High quality");
+            BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
         }
 
         public void DetectClick(int x, int y)
@@ -86,6 +73,12 @@ namespace CharaChatSV
             if (IconDestination.Contains(x, y))
             {
                 isOpen = !isOpen;
+            }
+
+            if (isOpen)
+            {
+                budgetQualityButton.DetectClick(x, y);
+                highQualityButton.DetectClick(x, y);
             }
         }
     }
