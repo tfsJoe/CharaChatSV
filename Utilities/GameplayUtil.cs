@@ -14,7 +14,7 @@ namespace CharaChatSV
             allCharacters = new List<NPC>(64);
             foreach (var location in Game1.locations)
                 allCharacters.AddRange(location.characters);
-            ModEntry.Log($"All {allCharacters.Count} characters: {string.Join(' ', allCharacters.Select(c => c.Name))}");
+            // ModEntry.Log($"All {allCharacters.Count} characters: {string.Join(' ', allCharacters.Select(c => c.Name))}");
             return allCharacters;
         }
     }

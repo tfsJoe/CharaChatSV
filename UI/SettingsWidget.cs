@@ -59,6 +59,7 @@ namespace CharaChatSV
             BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
             UserSettings.Inst.AiQuality = "budget";
             UserSettings.Write();
+            Game1.playSound("smallSelect");
         }
         
         private static void SetDaVinci()
@@ -67,6 +68,7 @@ namespace CharaChatSV
             BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
             UserSettings.Inst.AiQuality = "high";
             UserSettings.Write();
+            Game1.playSound("smallSelect");
         }
 
         public bool DetectClick(int x, int y)
@@ -77,6 +79,7 @@ namespace CharaChatSV
             {
                 isOpen = !isOpen;
                 result = true;
+                Game1.playSound("smallSelect");
             }
 
             if (isOpen)

@@ -33,8 +33,16 @@ namespace CharaChatSV
             if (tokenString != null)
             {
                 ModEntry.Log($"Read login token: {tokenString}");
-                cachedLoginToken = Guid.Parse(tokenString);
-                return cachedLoginToken;
+                try
+                {
+                    cachedLoginToken = Guid.Parse(tokenString);
+                }
+                catch (FormatException e)
+                {
+                    ModEntry.monitor.Log($"Couldn't parse login token {tokenString}. Making a new one; you will need to authorize the game again.", LogLevel.Warn);
+                }
+
+                if (cachedLoginToken != Guid.Empty) return cachedLoginToken;
             }
             return RefreshLoginToken(helper);
         }
