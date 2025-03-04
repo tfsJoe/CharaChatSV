@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using StardewValley;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public static class ConvoParser
     {

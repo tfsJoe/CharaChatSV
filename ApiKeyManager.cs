@@ -1,4 +1,4 @@
-﻿namespace StardewChatter
+﻿namespace CharaChatSV
 {
     public class ApiKeyManager
     {

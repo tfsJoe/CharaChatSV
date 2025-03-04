@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public abstract class ChatFetcher
     {

@@ -7,7 +7,7 @@ using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     internal class ConvoWindow : IClickableMenu
     {

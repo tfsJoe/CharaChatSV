@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public sealed class DaVinciFetcher : ChatFetcher
     {

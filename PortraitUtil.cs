@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Linq;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     public static class PortraitUtil
     {

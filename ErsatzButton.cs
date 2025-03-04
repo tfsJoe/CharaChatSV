@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.GameData.HomeRenovations;
 
-namespace StardewChatter
+namespace CharaChatSV
 {
     // I know the game already has buttons, perhaps via ClickableTextureComponent?
     // But I wasn't able to make sense of them quickly, and I figured I could get this up and running faster.
