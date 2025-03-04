@@ -84,11 +84,6 @@ namespace CharaChatSV
         
         #region debug
         #if DEBUG
-        private static void LinusHowdy()
-        {
-            var linus = Game1.getCharacterFromName("Linus");
-            Game1.drawDialogue(linus, "Howdy");
-        }
 
         private void LogCursorTile()
         {
@@ -101,7 +96,7 @@ namespace CharaChatSV
         {
             foreach (var npc in Game1.currentLocation.characters)
             {
-                Monitor.Log($"{npc.Name}: ({npc.getTileLocation()}) " +
+                Monitor.Log($"{npc.Name}: ({npc.Tile}) " +
                             $"{(npc.IsInConvoRange() ? " | Near" : "")}" +
                             $"{(npc.IsDialogueEmpty() ? " | Quiet" : "")}", LogLevel.Debug);
             }

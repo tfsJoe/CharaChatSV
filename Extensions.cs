@@ -13,7 +13,7 @@ namespace CharaChatSV
     {
         public static bool IsInConvoRange(this NPC npc)
         {
-            var sqDist = Vector2.DistanceSquared(npc.getTileLocation(), Game1.player.getTileLocation());
+            var sqDist = Vector2.DistanceSquared(npc.Tile, Game1.player.Tile);
             return sqDist <= 2;
         }
 
