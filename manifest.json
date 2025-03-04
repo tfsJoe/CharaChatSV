@@ -1,12 +1,11 @@
 {
-	"Name": "StardewChatter",
-	"Author": "Me",
-	"Version": "0.2.0",
+	"Name": "CharaChatSV",
+	"Author": "ManOfCorn",
+	"Version": "0.3.0",
 	"Description": "Deeper conversations with the other inhabitants of Stardew Valley",
-	"UniqueID": "Me.StardewChatter",
-	"EntryDll": "StardewChatter.dll",
-	"MinimumApiVersion": "3.0.0",
+	"UniqueID": "ManOfCorn.CharaChatSV",
+	"EntryDll": "CharaChatSV.dll",
+	"MinimumApiVersion": "4.1.0",
 	"UpdateKeys": [],
-	"AiModel" : "default",
-	"ApiUrl": "https://customize--starchatter.netlify.app/api/stardewChat"
+	"AiModel" : "davinci"
 }

@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <Company>CharaChat</Company>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.0" />
   </ItemGroup>
-  
+
   <!-- Normal resources -->
   <ItemGroup>
     <EmbeddedResource Include="davinci-promptTemplate.txt">
@@ -23,21 +24,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
-  
-  <!-- Copies a dummy version of the API key for release builds. Use your real  -->
-  <Target Name="CopyAPIKey">
-    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-      <APIKey Include="$(ProjectDir)\apiKeys-secret.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        <DestinationRelativePath>apiKeys.json</DestinationRelativePath>
-      </APIKey>
-    </ItemGroup>
 
-    <ItemGroup Condition="'$(Configuration)' == 'Release'">
-      <APIKey Include="$(ProjectDir)\apiKeys-dummy.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        <DestinationRelativePath>apiKeys.json</DestinationRelativePath>
-      </APIKey>
-    </ItemGroup>
-  </Target>
+  <!-- Copies a dummy version of the API key for release builds. Use your real  -->
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <EmbeddedResource Include="apiKeys-secret.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>apiKeys.json</TargetPath>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <EmbeddedResource Include="apiKeys-dummy.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>apiKeys.json</TargetPath>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

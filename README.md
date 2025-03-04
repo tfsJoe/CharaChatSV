@@ -4,7 +4,7 @@
 
 ### API Keys (Important!!)
 
-Currently, you need an OpenAI private API key to use this mod. **DO NOT COMMIT THIS INFORMATION.** Anyone you share it with can ultimately use it to cost you money.
+Currently, you need an OpenAI private API key to use this mod. **DO NOT SHARE OR COMMIT THIS INFORMATION.** Anyone you share it with can ultimately use it to cost you money.
 
 At this writing, [OpenAI is offering $18 of free credits for 3 months here.](https://openai.com/api/)
 

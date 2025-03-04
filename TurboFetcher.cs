@@ -44,7 +44,7 @@ namespace CharaChatSV
             };
         }
 
-        public override async Task<string> Chat(string userInput, Guid _, Guid __)
+        public override async Task<string> Chat(string userInput)
         {
             userInput = Sanitize(userInput);
             messageHistory.Add(new TurboMessage(TurboMessage.Role.user, userInput));
@@ -90,7 +90,7 @@ namespace CharaChatSV
                 return "(No response...)";
             }
 
-            reply = SanitizeReply(reply);
+            reply = Sanitize(reply);
             messageHistory.Add(new TurboMessage(TurboMessage.Role.assistant, reply));
             return reply;
         }

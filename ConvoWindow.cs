@@ -130,7 +130,7 @@ namespace CharaChatSV
         
         private async void UpdateOnReply(string nextInput)
         {
-            npcReply = await chatApi.Chat(nextInput, LoginToken, currentConvoId);
+            npcReply = await chatApi.Chat(nextInput);
             curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
             textInput.UnlockAfterDelay();
             if (Status == Status.Closed) return;

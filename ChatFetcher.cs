@@ -3,7 +3,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -42,7 +41,7 @@ namespace CharaChatSV
 
         public static ChatFetcher Instantiate(IModHelper helper)
         {
-            ModEntry.Log($"StardewChatter version: {Manifest.Inst.Version}");
+            ModEntry.Log($"CharaChatSV version: {Manifest.Inst.Version}");
             var modelSetting = Manifest.Inst?.AiModel;
             switch (modelSetting)
             {
@@ -50,20 +49,14 @@ namespace CharaChatSV
                     ModEntry.monitor.Log($"This AI setting will use your credits around 10x faster! \n" +
                                          $"Recommended to use 'turbo'. Set in manifest.json file.",
                         LogLevel.Alert);
-                    // return new DaVinciFetcher(helper);
-                    BackendFetcher.aiModel = BackendFetcher.AiModel.davinci;
-                    return new BackendFetcher(helper);
+                    return new DaVinciFetcher(helper);
                 case "turbo":
                 case "default":
-                    // return new TurboFetcher(helper);
-                    BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
-                    return new BackendFetcher(helper);
+                    return new TurboFetcher(helper);
                 default:
                     ModEntry.monitor.Log($"Did not understand AI model setting '{modelSetting}', using default.",
                         LogLevel.Warn);
-                    // return new TurboFetcher(helper);
-                    BackendFetcher.aiModel = BackendFetcher.AiModel.turbo;
-                    return new BackendFetcher(helper);
+                    return new TurboFetcher(helper);
             }
         }
 
@@ -75,17 +68,12 @@ namespace CharaChatSV
         /// However, they should rely on SendChatRequest and SanitizeReply from this superclass.
         /// </remarks>
         /// <returns>The text reply from the chat AI, appropriately parsed and sanitized.</returns>
-        public abstract Task<string> Chat(string userInput, Guid loginToken, Guid convoId);
-
-        protected static string Sanitize(string userInput)
+        public abstract Task<string> Chat(string userInput);
+        
+        //TODO
+        protected static string SanitizePrompt(string prompt)
         {
-            if (userInput.Length > TextInput.MAX_CHAR_COUNT)
-            {
-                ModEntry.Log($"Prompt too long ({userInput.Length} chars), truncating to {TextInput.MAX_CHAR_COUNT} chars");
-                userInput = userInput.Substring(0, TextInput.MAX_CHAR_COUNT);
-            }
-
-            return userInput;
+            return prompt;
         }
         
         protected async Task RateLimit()
@@ -117,17 +105,7 @@ namespace CharaChatSV
             ModEntry.Log($"(RequestBody)\n{json}");
             await RateLimit();
             waitForRateLimit = true;
-            HttpResponseMessage httpResponse = null;
-            try {httpResponse = await client.SendAsync(request); }
-            catch (HttpRequestException e)
-            {
-                httpResponse = new HttpResponseMessage()
-                {
-                    StatusCode = HttpStatusCode.BadGateway,
-                    ReasonPhrase = e.Message
-                };
-            }
-
+            var httpResponse = await client.SendAsync(request);
             if (!httpResponse.IsSuccessStatusCode)
             {
                 ModEntry.monitor.Log($"{(int)httpResponse.StatusCode} {httpResponse.StatusCode}:" +
@@ -137,7 +115,7 @@ namespace CharaChatSV
             return httpResponse;
         }
 
-        protected virtual string SanitizeReply(string reply)
+        protected virtual string Sanitize(string reply)
         {
             reply = Regex.Unescape(reply);
             if (reply.Length > 1 && reply[0] == ' ')

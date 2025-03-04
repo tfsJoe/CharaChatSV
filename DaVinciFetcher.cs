@@ -32,7 +32,7 @@ namespace CharaChatSV
             chatLog = ConvoParser.ParseTemplate(npc, this);
         }
 
-        public override async Task<string> Chat(string userInput, Guid _, Guid __)
+        public override async Task<string> Chat(string userInput)
         {
             userInput = Sanitize(userInput);
             chatLog += $"\n@human: {userInput}\n@ai: ";
@@ -66,7 +66,7 @@ namespace CharaChatSV
                 return "(No response...)";
             }
 
-            reply = SanitizeReply(reply);
+            reply = Sanitize(reply);
             chatLog += reply;
             return reply;
         }
