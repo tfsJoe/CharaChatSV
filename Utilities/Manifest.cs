@@ -3,11 +3,11 @@
 namespace CharaChatSV
 {
     /// <summary>Data class for parsing manifest.json</summary>
-    public class Manifest
+    internal class Manifest
     {
         public string Version { get; set; }
-        public string AiModel { get; set; }
-        public string ApiUrl { get; set; }
+        public string ApiRoot { get; set; }
+        public string WebRoot { get; set; }
 
         public static Manifest Inst { get; private set; }
 

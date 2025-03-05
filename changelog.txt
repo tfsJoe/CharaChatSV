@@ -1,0 +1,10 @@
+Chara.Chat mod for Stardew Valley: change log
+
+v1.0.1
+* Farmer's own children can only speak from toddler age
+* Improved acting for farmer's children
+* Improved AI knowledge about player's family
+* Fixed: Mod prevented farmer from hugging/kissing family. Convo will no longer open until after first one of the day.
+* Fixed: Use display name instead of name in empty convo window. Some mods have weird base names for NPCs.
+* Workaround: UI size tied to zoom level in unpredictable ways. Adjust zoom on open and close instead. Slight visual artifact.
+* Add settings menu and ability to switch between budget and high quality AI setting.

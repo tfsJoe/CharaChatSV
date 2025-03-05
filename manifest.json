@@ -6,6 +6,6 @@
 	"UniqueID": "ManOfCorn.CharaChatSV",
 	"EntryDll": "CharaChatSV.dll",
 	"MinimumApiVersion": "4.1.0",
-	"UpdateKeys": [],
+	"UpdateKeys": ["Nexus:16808"],
 	"AiModel" : "default"
 }

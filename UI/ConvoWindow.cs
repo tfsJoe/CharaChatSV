@@ -5,44 +5,26 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CharaChatSV
 {
     internal class ConvoWindow : IClickableMenu
     {
-        private readonly IModHelper helper; //SMAPI helper, not Stardew-native
+        public readonly IModHelper helper; //SMAPI helper, not Stardew-native
         private readonly TextInput textInput;
         private readonly ErsatzButton clearButton, submitButton;
+        private readonly PopcornReportWidget popcornWidget;
+        private readonly SettingsWidget settingsWidget;
         private int x, yTop, yBottom, w, hTop, hBottom;
+        private float cachedZoom = 1f;
 
         private NPC interlocutor;
-        private Rectangle curEmotionSpriteRect;
+        private Rectangle? curEmotionSpriteRect;
         private string npcReply = "";
         private readonly ChatFetcher chatApi;
         
         private Guid currentConvoId;
-        private Guid loginToken = Guid.Empty;
-
-        private Guid LoginToken
-        {
-            get
-            {
-                if (loginToken != Guid.Empty) return loginToken;
-                var tokenString = helper.Data.ReadGlobalData<string>("chatterLoginToken");
-                if (tokenString != null)
-                {
-                    ModEntry.Log($"Read login token: {tokenString}");
-                    loginToken = Guid.Parse(tokenString);
-                    return loginToken;
-                }
-                loginToken = Guid.NewGuid();
-                tokenString = loginToken.ToString();
-                helper.Data.WriteGlobalData("chatterLoginToken", tokenString);
-                ModEntry.Log($"Made new login token {tokenString}");
-                return loginToken;
-            }
-        }
 
         private Status status = Status.Closed;
         public Status Status
@@ -56,6 +38,8 @@ namespace CharaChatSV
                     // ModEntry.Log("Closing ConvoWindow.");
                     Game1.playSound("bigDeSelect");
                     Reset();
+                    Game1.options.desiredBaseZoomLevel = cachedZoom;
+                    settingsWidget.isOpen = false;
                     Game1.activeClickableMenu = null;
                 }
                 else
@@ -78,6 +62,9 @@ namespace CharaChatSV
         private Rectangle SubmitButtonRect => new Rectangle(w /2 + 8, ClearButtonRect.Y,
             192, 48);
 
+        public Point PopcornWidgetAnchor => new Point(PlayerTextRect.X, PlayerTextRect.Y + PlayerTextRect.Height + 24);
+        public Point SettingsWidgetAnchor => new Point(SubmitButtonRect.Right + 32, SubmitButtonRect.Top);
+
         private static readonly Rectangle CloseButtonSource = new Rectangle(338, 494, 11, 11);  // Examined spritesheet for vals
         private Rectangle CloseButtonRect => new Rectangle(PlayerTextRect.Width + PlayerTextRect.X + 25 , PlayerTextRect.Y - 25,
             CloseButtonSource.Width * 4, CloseButtonSource.Height * 4);
@@ -93,6 +80,8 @@ namespace CharaChatSV
             var textBoxTexture = helper.GameContent.Load<Texture2D>("LooseSprites\\textBox");
             clearButton = new ErsatzButton(textBoxTexture, "Clear (tab)", ClearButtonRect, textInput.Clear);
             submitButton = new ErsatzButton(textBoxTexture, "Say (enter)", SubmitButtonRect, SubmitContent);
+            popcornWidget = new PopcornReportWidget(this);
+            settingsWidget = new SettingsWidget(this, textBoxTexture);
             chatApi = ChatFetcher.Instantiate(helper);
         }
 
@@ -101,7 +90,6 @@ namespace CharaChatSV
         /// Warning: if you do not, behavior will be unpredictable. May show old convos.
         /// </summary>
         /// <param name="npc">To which NPC is the player speaking?</param>
-        /// <param name="prompt">What has the player said to this NPC?</param>
         public void StartConversation(NPC npc)
         {
             if (npc == null)
@@ -110,12 +98,21 @@ namespace CharaChatSV
                 Status = Status.Closed;
                 return;
             }
+            
+            CheckLoginState.Check(helper, true, (balance) => popcornWidget.popcornCount = balance)
+                .ConfigureAwait(false); // Suppress warning about not awaiting async method
 
             currentConvoId = Guid.NewGuid();
             ModEntry.Log($"New chat ID: {currentConvoId}");
             interlocutor = npc;
+            curEmotionSpriteRect = null;
             Status = Status.OpenInit;
             chatApi.SetUpChat(npc);
+            textInput.lockout = false;
+
+            cachedZoom = Game1.options.desiredBaseZoomLevel;
+            Game1.options.desiredBaseZoomLevel = 1f;
+
             Game1.activeClickableMenu = this;
             Game1.playSound("bigSelect");
         }
@@ -124,19 +121,72 @@ namespace CharaChatSV
         {
             Game1.playSound("select");
             Status = Status.OpenWaiting;
-            textInput.LockInput();
-            UpdateOnReply(textInput.Content);
+            textInput.lockout = true;
+            UpdateOnResponse(textInput.Content);
+        }
+
+        private void ShowReply(BackendResponse response)
+        {
+            chatApi.ReplySucceeded();
+            npcReply = ChatFetcher.SanitizeReply(response.Reply);
+            curEmotionSpriteRect =
+                EmotionUtil.EmotionToPortraitRect(interlocutor, EmotionUtil.ExtractEmotion(ref npcReply));
         }
         
-        private async void UpdateOnReply(string nextInput)
+        private async void UpdateOnResponse(string nextInput)
         {
-            npcReply = await chatApi.Chat(nextInput);
-            curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
-            textInput.UnlockAfterDelay();
+            var token = NetRequestUtil.GetLoginToken(helper);
+            var response = await chatApi.Chat(nextInput, token, currentConvoId);
             if (Status == Status.Closed) return;
+            switch (response.Signal)
+            {
+                case ResponseSignal.ok:
+                    ShowReply(response);
+                    textInput.UnlockAfterDelay();
+                    break;
+                case ResponseSignal.underfunded:
+                    npcReply = "(Not enough popcorn! Shop window will open in your web browser.)";
+                    textInput.lockout = false;
+                    textInput.clearOnNextInput = false;
+                    await Task.Delay(3000);
+                    if (Status != Status.Closed)
+                        Extensions.OpenUrl($"{Manifest.Inst.WebRoot}/buy");
+                    break;
+                case ResponseSignal.moderated:
+                    Status = Status.Closed;
+                    bool male = interlocutor.Gender == 0;
+                    Game1.drawDialogue(interlocutor, $"({(male ? "He" : "She")} seems speechless.$s)");
+                    break;
+                case ResponseSignal.final:
+                    ShowReply(response);
+                    textInput.LockoutWithMessage("(Alright, I think it's about time we move on with our day.)");
+                    break;
+                case ResponseSignal.tooLong:
+                    npcReply = "";
+                    textInput.LockoutWithMessage("(This has been going on a while... " +
+                                                 $"I'd better leave {interlocutor.Name} alone.)");
+                    break;
+                case ResponseSignal.rateLimited:
+                    npcReply = "Too many people want to chat with us right now. Please try again later.\n" +
+                               "(Service over capacity)";
+                    break;
+                case ResponseSignal.obsolete:
+                    Status = Status.Closed;
+                    Game1.drawObjectDialogue("Please update Chara.Chat mod to chat with NPCs. Opening in browser...");
+                    await Task.Delay(3000);
+                    // TODO: open mod page instead
+                    Extensions.OpenUrl(Manifest.Inst.WebRoot + "/svModDownload");
+                    break;
+                case ResponseSignal.unknown:
+                    npcReply = response.Reply;  // Expected to contain error message
+                    textInput.UnlockAfterDelay();
+                    break;
+            }
+
+            popcornWidget.popcornCount = response.Balance;
             Status = Status.OpenDisplaying;
         }
-        
+
         public override void draw(SpriteBatch b)
         {
             base.draw(b);
@@ -155,6 +205,10 @@ namespace CharaChatSV
             // NPC response portion
             drawTextureBox(b, NpcTextRect.X - HPadding, NpcTextRect.Y - VPadding, 
                 NpcTextRect.Width + HPadding * 2, NpcTextRect.Height + VPadding * 2, Color.White);
+            // Popcorn report
+            popcornWidget.Draw(b);
+            // Settings button
+            settingsWidget.Draw(b);
 
 #if DEBUG
             // b.Draw(Game1.fadeToBlackRect, NpcTextRect, Color.Aqua * .15f);
@@ -164,7 +218,7 @@ namespace CharaChatSV
             switch (status)
             {
                 case Status.OpenInit:
-                    b.DrawWordWrappedText($"(Say something to {interlocutor?.Name})",
+                    b.DrawWordWrappedText($"(Say something to {interlocutor?.displayName})",
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenWaiting:
@@ -172,7 +226,8 @@ namespace CharaChatSV
                         NpcTextRect, Game1.dialogueFont, NpcTextColor);
                     break;
                 case Status.OpenDisplaying:
-                    interlocutor?.DrawPortrait(b, curEmotionSpriteRect, NpcPortraitRect);
+                    if (curEmotionSpriteRect.HasValue)
+                        interlocutor?.DrawPortrait(b, curEmotionSpriteRect.Value, NpcPortraitRect);
 
                     if (!string.IsNullOrEmpty(npcReply))
                     {
@@ -187,8 +242,12 @@ namespace CharaChatSV
             }
             
             // Buttons
-            clearButton.Draw(b);
-            submitButton.Draw(b);
+            if (!textInput.lockout)
+            {
+                clearButton.Draw(b);
+                submitButton.Draw(b);
+            }
+
             b.Draw(Game1.mouseCursors, CloseButtonRect, CloseButtonSource, Color.White);
 
             drawMouse(b);
@@ -197,8 +256,12 @@ namespace CharaChatSV
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
             base.receiveLeftClick(x, y, playSound);
-            clearButton.DetectClick(x, y);
-            submitButton.DetectClick(x, y);
+            if (!textInput.lockout)
+            {
+                clearButton.DetectClick(x, y);
+                submitButton.DetectClick(x, y);
+            }
+            settingsWidget.DetectClick(x, y);
             DetectCloseButtonClick(x, y);
         }
 
@@ -234,10 +297,10 @@ namespace CharaChatSV
             textInput?.UnsubscribeAll(helper.Events);
             textInput?.Clear();
             npcReply = "";
-            curEmotionSpriteRect = PortraitUtil.EmotionToPortraitRect(Emotion.Neutral);
+            curEmotionSpriteRect = new Rectangle(0, 0,64, 64);
         }
 
-        private static string GetSpinnerString()
+        public static string GetSpinnerString()
         {
             int dots = ((DateTime.Now.Millisecond / 200) % 5);
             switch (dots)

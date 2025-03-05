@@ -24,8 +24,8 @@ namespace CharaChatSV
         
         public const int MAX_CHAR_COUNT = 300;
         private static readonly char[] illegalChars = new[] { '\\', '\"', ':', '@', '\n', '\r', '\t'};
-        private bool clearOnNextInput;
-        private bool lockout;
+        public bool clearOnNextInput;
+        public bool lockout;
         private const int LOCKOUT_TIME = 1500;
 
         private string content = "";
@@ -226,13 +226,18 @@ namespace CharaChatSV
             Game1.playSound("cancel");
         }
 
-        public void LockInput() => lockout = true;
-
         public async void UnlockAfterDelay()
         {
             await Task.Delay(LOCKOUT_TIME);
             lockout = false;
             clearOnNextInput = true;
+        }
+        
+        public void LockoutWithMessage(string message)
+        {
+            lockout = true;
+            Content = message;
+            CaretIndex = Content.Length;
         }
 
         bool IKeyboardSubscriber.Selected
