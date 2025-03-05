@@ -7,5 +7,5 @@
 	"EntryDll": "CharaChatSV.dll",
 	"MinimumApiVersion": "4.1.0",
 	"UpdateKeys": [],
-	"AiModel" : "davinci"
+	"AiModel" : "default"
 }

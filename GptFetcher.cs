@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using StardewModdingAPI;
@@ -8,17 +9,17 @@ using StardewValley;
 
 namespace CharaChatSV
 {
-    public sealed class TurboFetcher : ChatFetcher
+    public sealed class GptFetcher : ChatFetcher
     {
         protected override int RequestWaitTime => 3500;
         protected override string CompletionsUrl => "https://api.openai.com/v1/chat/completions";
 
-        private TurboRequestBody requestBodyTemplate;
-        private List<TurboMessage> messageHistory = new();
+        private GptRequestBody requestBodyTemplate;
+        private List<GptMessage> messageHistory = new();
         
-        public TurboFetcher(IModHelper helper) : base(helper)
+        public GptFetcher(IModHelper helper) : base(helper)
         {
-            requestBodyTemplate = helper.Data.ReadJsonFile<TurboRequestBody>("turbo-requestTemplate.json");
+            requestBodyTemplate = helper.Data.ReadJsonFile<GptRequestBody>("gpt-requestTemplate.json");
             if (requestBodyTemplate == null)
             {
                 throw new InvalidDataException("Failed to load request body template");
@@ -31,29 +32,34 @@ namespace CharaChatSV
 
         public override void SetUpChat(NPC npc)
         {
-            messageHistory = new List<TurboMessage>
+            messageHistory = new List<GptMessage>
             {
                 /* Open AI warns:
                 "gpt-3.5-turbo-0301 does not always pay strong attention to system messages.
                 Future models will be trained to pay stronger attention to system messages."
                     https://platform.openai.com/docs/guides/chat/introduction
-                Therefore, short instructions as a system message, detailed as a user message. */
-                new (TurboMessage.Role.system, 
-                    $"You are engaging in a roleplay as the character {npc.Name} in Stardew Valley."),
-                new (TurboMessage.Role.user, ConvoParser.ParseTemplate(npc, this)),
+                Therefore, short instructions as a system message, detailed as a user message.
+                However, this appears to no longer be a problem with gpt-4o-mini, so I am
+                reverting to using the system message. */
+                new (GptMessage.Role.developer, ConvoParser.ParseTemplate(npc, this)),
             };
         }
 
         public override async Task<string> Chat(string userInput)
         {
             userInput = Sanitize(userInput);
-            messageHistory.Add(new TurboMessage(TurboMessage.Role.user, userInput));
+            messageHistory.Add(new GptMessage(GptMessage.Role.user, userInput));
             requestBodyTemplate.messages = messageHistory;
             var httpResponse = await SendChatRequest(requestBodyTemplate);
             if (!httpResponse.IsSuccessStatusCode)
             {
-                return $"(Failure! {(int)httpResponse.StatusCode} {httpResponse.StatusCode}: " +
+                var result = $"(Failure! {(int)httpResponse.StatusCode} {httpResponse.StatusCode}: " +
                        $"{httpResponse.ReasonPhrase})";
+                if (httpResponse.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    result += "\n(You may need to purchase more OpenAI credits.)";
+                }
+                return result;
             }
             
             string reply;
@@ -64,7 +70,7 @@ namespace CharaChatSV
                     var choice0 = doc.RootElement.GetProperty("choices")[0];
                     var messageElement = choice0.GetProperty("message");
                     var role = messageElement.GetProperty("role").GetString();
-                    if (TurboMessage.Role.assistant.ToString() != role)
+                    if (GptMessage.Role.assistant.ToString() != role)
                     {
                         return $"(Failure! Unexpected message role: {role})";
                     }
@@ -91,7 +97,7 @@ namespace CharaChatSV
             }
 
             reply = Sanitize(reply);
-            messageHistory.Add(new TurboMessage(TurboMessage.Role.assistant, reply));
+            messageHistory.Add(new GptMessage(GptMessage.Role.assistant, reply));
             return reply;
         }
     }

@@ -14,13 +14,13 @@
     <EmbeddedResource Include="davinci-promptTemplate.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="turbo-promptTemplate.txt">
+    <EmbeddedResource Include="gpt-promptTemplate.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="davinci-requestTemplate.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="turbo-requestTemplate.json">
+    <EmbeddedResource Include="gpt-requestTemplate.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

@@ -15,8 +15,8 @@ namespace CharaChatSV
                 case DaVinciFetcher:
                     fileName = "davinci-promptTemplate.txt";
                     break;
-                case TurboFetcher:
-                    fileName = "turbo-promptTemplate.txt";
+                case GptFetcher:
+                    fileName = "gpt-promptTemplate.txt";
                     break;
                 default:
                     throw new ArgumentException($"Unknown fetcher type '{source.GetType().Name}; " +

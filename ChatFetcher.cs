@@ -46,17 +46,16 @@ namespace CharaChatSV
             switch (modelSetting)
             {
                 case "davinci":
-                    ModEntry.monitor.Log($"This AI setting will use your credits around 10x faster! \n" +
-                                         $"Recommended to use 'turbo'. Set in manifest.json file.",
+                    ModEntry.monitor.Log($"This is an expensive AI model! It may also be deprecated.",
                         LogLevel.Alert);
                     return new DaVinciFetcher(helper);
-                case "turbo":
+                case "gpt":
                 case "default":
-                    return new TurboFetcher(helper);
+                    return new GptFetcher(helper);
                 default:
                     ModEntry.monitor.Log($"Did not understand AI model setting '{modelSetting}', using default.",
                         LogLevel.Warn);
-                    return new TurboFetcher(helper);
+                    return new GptFetcher(helper);
             }
         }
 
