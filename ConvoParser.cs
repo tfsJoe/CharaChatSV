@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using StardewValley;
+using StardewValley.Characters;
 
 namespace CharaChatSV
 {
@@ -59,13 +61,17 @@ namespace CharaChatSV
             };
             
             bool gotFriendship = Game1.player.friendshipData.TryGetValue(npc.Name, out var friendship);
+            List<Child> children = Game1.player.getChildren();
+            Child olderChild = children?.FirstOrDefault();
+            Child youngerChild = children?.LastOrDefault();
             string relationshipStatus = !gotFriendship ? "strangers" :
                 friendship.IsMarried() ? "married" :
                 friendship.IsDating() ? "dating" :
                 friendship.IsDivorced() ? "divorced" :
                 friendship.IsRoommate() ? "roomates" :
                 friendship.IsEngaged() ? "engaged" :
-                Game1.player.getChildren().FirstOrDefault(c => c.Name == npc.Name) != null ? "that @npc-name is @player-name's child" :
+                olderChild?.getName() == npc.Name ? "that @npc-name is @player-name's oldest child" :
+                youngerChild?.getName() == npc.Name ? "that @npc-name is @player-name's youngest child" :
                 "platonic";
 
             prompt = prompt
