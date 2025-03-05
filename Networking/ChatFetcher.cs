@@ -15,16 +15,49 @@ namespace CharaChatSV
 {
     public abstract class ChatFetcher
     {
+        private readonly HttpClient client = new();
+        
         protected abstract int RequestWaitTime { get; }
         protected abstract string CompletionsUrl { get; }
-        protected static bool waitForRateLimit;
+        private static bool waitForRateLimit;
+        
+        public ChatFetcher(IModHelper helper)
+        {
+            var modVersion = Manifest.Inst?.Version;
+            if (modVersion == null) modVersion = "";
+            
+            var keyManager = helper.Data.ReadJsonFile<ApiKeyManager>("apiKeys.json");
+            if (keyManager == null)
+            {
+                throw new InvalidDataException("Failed to read apiKeys.json");
+            }
+            if (keyManager.openAI.Contains(' '))
+            {
+                throw new InvalidDataException("OpenAI API key has not been correctly entered in apiKeys.json. Please set this value");
+            }
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", keyManager.openAI);
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("StardewChatter", modVersion));
+        }
 
         public static ChatFetcher Instantiate(IModHelper helper)
         {
-            /* There used to be several subclasses (one for each AI model) but since we always go through the
-             backend now, this is no longer needed, and there's no need to decide in this factory method.
-             The AI model setting is a static member of BackendFetcher now.*/
-            return new BackendFetcher();
+            ModEntry.Log($"CharaChatSV version: {Manifest.Inst.Version}");
+            var modelSetting = Manifest.Inst?.AiModel;
+            switch (modelSetting)
+            {
+                case "davinci":
+                    ModEntry.monitor.Log($"This is an expensive AI model! It may also be deprecated.",
+                        LogLevel.Alert);
+                    return new DaVinciFetcher(helper);
+                case "gpt":
+                case "default":
+                    return new GptFetcher(helper);
+                default:
+                    ModEntry.monitor.Log($"Did not understand AI model setting '{modelSetting}', using default.",
+                        LogLevel.Warn);
+                    return new GptFetcher(helper);
+            }
         }
 
         public abstract void SetUpChat(NPC npc);
@@ -34,9 +67,8 @@ namespace CharaChatSV
         /// since both the input and output defined by the chat API may differ based on the AI model used.
         /// However, they should rely on SendChatRequest and SanitizeReply from this superclass.
         /// </remarks>
-        /// <returns>A tuple containing a signal describing any issues encountered while generating response,
-        /// and the text reply from the chat AI, appropriately parsed and sanitized.</returns>
-        public abstract Task<BackendResponse> Chat(string userInput, Guid loginToken, Guid convoId);
+        /// <returns>The text reply from the chat AI, appropriately parsed and sanitized.</returns>
+        public abstract Task<string> Chat(string userInput);
 
         protected static string Sanitize(string userInput)
         {
@@ -57,29 +89,28 @@ namespace CharaChatSV
         
         protected async Task<HttpResponseMessage> SendChatRequest(object requestBody)
         {
-            HttpRequestMessage request;
-            try
+            if (requestBody == null) 
+                throw new ArgumentNullException(nameof(requestBody), "Must not be null");
+            string json;
+            var options = new JsonSerializerOptions
             {
-                request = NetRequestUtil.RequestPostObjToUrl(requestBody, CompletionsUrl);
-            }
+#if DEBUG
+                WriteIndented = true
+#endif
+            };
+            try { json = JsonSerializer.Serialize(requestBody, options); }
             catch (NotSupportedException)
             {
+                ModEntry.Log($"Couldn't serialize requestBody! {requestBody.GetType()} {requestBody}");
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
-
+            var requestPayload = new StringContent(json, Encoding.UTF8, "application/json" );
+            var request = new HttpRequestMessage(HttpMethod.Post, CompletionsUrl) {Content = requestPayload};
             ModEntry.Log(request.ToString());
+            ModEntry.Log($"(RequestBody)\n{json}");
             await RateLimit();
             waitForRateLimit = true;
-            HttpResponseMessage httpResponse = null;
-            try { httpResponse = await NetRequestUtil.Client.SendAsync(request); }
-            catch (HttpRequestException e)
-            {
-                httpResponse = new HttpResponseMessage()
-                {
-                    StatusCode = HttpStatusCode.BadGateway,
-                    ReasonPhrase = e.Message
-                };
-            }
+            var httpResponse = await client.SendAsync(request);
 
             if (!httpResponse.IsSuccessStatusCode)
             {
@@ -92,7 +123,7 @@ namespace CharaChatSV
         
         /// <summary>
         /// Some subclasses may need to clean up the initial prompt, but only if the reply was successful.
-        /// If the initial prompt failed despite a response (e.g. out of popcorn, user input was moderated, etc,
+        /// If the initial prompt failed despite a response (e.g. user input was moderated)
         /// then the prompt needs to be retained for the next attempt.
         /// </summary>
         public virtual void ReplySucceeded() {}
