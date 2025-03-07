@@ -115,7 +115,8 @@ namespace CharaChatSV
         private async void UpdateOnReply(string nextInput)
         {
             npcReply = await chatApi.Chat(nextInput);
-            curEmotionSpriteRect = PortraitUtil.EmotionPortraitFromText(ref npcReply);
+            var emotion = EmotionUtil.ExtractEmotion(ref npcReply);
+            curEmotionSpriteRect = EmotionUtil.EmotionToPortraitRect(interlocutor, emotion);
             textInput.UnlockAfterDelay();
             if (Status == Status.Closed) return;
             Status = Status.OpenDisplaying;
@@ -224,7 +225,7 @@ namespace CharaChatSV
             textInput?.UnsubscribeAll(helper.Events);
             textInput?.Clear();
             npcReply = "";
-            curEmotionSpriteRect = PortraitUtil.EmotionToPortraitRect(Emotion.Neutral);
+            curEmotionSpriteRect = EmotionUtil.DefaultPortraitRect;
         }
 
         private static string GetSpinnerString()

@@ -9,6 +9,8 @@ namespace CharaChatSV
 {
     internal static class EmotionUtil
     {
+        public static Rectangle DefaultPortraitRect => new Rectangle(0, 0, 64, 64);
+        
         /// <summary>Based on inspecting the spritesheets</summary>
         public static IReadOnlyDictionary<string, IReadOnlyList<string>> characterEmotions =
             new Dictionary<string, IReadOnlyList<string>>
@@ -499,6 +501,8 @@ namespace CharaChatSV
 
         private static Rectangle IndexToRect(int index)
         {
+            if (index <= -1) return DefaultPortraitRect;
+            
             var x = index % 2 * 64;
             var y = index / 2 * 64;
             return new Rectangle(x, y, 64, 64);
@@ -507,12 +511,12 @@ namespace CharaChatSV
         public static Rectangle EmotionToPortraitRect(NPC npc, string emotion)
         {
             if (string.IsNullOrEmpty(emotion))
-                return new Rectangle(0, 0, 64, 64); // Hopefully first rect is neutral
+                return DefaultPortraitRect; // Hopefully first rect is neutral
             
             if (!characterEmotions.ContainsKey(npc.Name))
             {
                 ModEntry.Log($"Don't know emotional range of NPC {npc.Name}");
-                return new Rectangle(0, 0, 64, 64); 
+                return DefaultPortraitRect; 
             }
             
             var emotions = characterEmotions[npc.Name];
@@ -531,7 +535,7 @@ namespace CharaChatSV
         
         public static string ExtractEmotion(ref string text)
         {
-            var pattern = @"\$([a-zA-Z]+)";
+            const string pattern = @"\$([a-zA-Z]+)";
             var match = Regex.Match(text, pattern);
             if (match.Success)
                 text = Regex.Replace(text, pattern, "");

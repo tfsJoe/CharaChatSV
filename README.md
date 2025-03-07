@@ -5,9 +5,9 @@ Stardew Valley mod to allow players to chat with NPCs using generative AI.
 
 ### API Keys (Important!!)
 
-Currently, you need an OpenAI private API key to use this mod. **DO NOT SHARE OR COMMIT THIS INFORMATION.** Anyone you share it with can ultimately use it to cost you money.
+Currently, you need an OpenAI private API key to use this mod. **DO NOT SHARE OR COMMIT THIS INFORMATION.** Anyone you share it with can ultimately use it to cost you money.  [You can get an API key here.](https://openai.com/api/)
 
-At this writing, [OpenAI is offering $18 of free credits for 3 months here.](https://openai.com/api/)
+By downloading or using this mod, you agree to indemnify the developers of any and all claims arising from its use, including but not limited to costs incurred.
 
 In this project, you can copy apiKeys-dummy.json to a new file, call it apiKeys-secret.json, and paste your API key there. This filename is ignored by git, so it will not be committed unless you mess with the filename or the .gitignore file.
 
@@ -19,5 +19,6 @@ Release builds will publish a dummy version of this file; users will need to pro
 * Interfacing with other AI providers, including locally-run
 * Better support for languages with non-Latin scripts
 * Efficiency improvements. Much string manipulation was not handled in a low-garbage way.
+* Automated unit tests
 
 Pull requests are welcome. Please adhere to C# coding standards where possible, maintain good architecture, and provide a clear explanation of what your changes do.

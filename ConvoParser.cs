@@ -119,18 +119,18 @@ namespace CharaChatSV
                 .Replace("@relationship-status", relationshipStatus)
                 .Replace("@npc-name", npc.Name)
                 .Replace("@player-name", Game1.player.Name)
-                .Replace("@emotion-token", GetEmotionOptionsPrompt(npc));
+                .Replace("@emotion-tokens", GetEmotionOptionsPrompt(npc));
             return prompt;
         }
 
-        private static string GetEmotionOptionsPrompt(Character npc)
+        private static string GetEmotionOptionsPrompt(NPC npc)
         {
             if (!EmotionUtil.characterEmotions.ContainsKey(npc.Name)) return " ";
-            string result = "Each reply should end with a single $-prefixed token based on the tone and context of the reply, from the following list: ";
+            string result = "Each reply should end with a single $ prefixed token based on the tone and context of the reply, from the following list: ";
             foreach (var emotion in EmotionUtil.characterEmotions[npc.Name])
             {
                 if (emotion == "(skip)") continue;
-                result += $"{emotion}, ";
+                result += $"${emotion}, ";
             }
             result = result[..^2] + ".";
             return result;
@@ -138,8 +138,6 @@ namespace CharaChatSV
 
         private static string DescribeFamily()
         {
-            string result = "The farmer's family details: ";
-            
             var spouse = (Game1.player.isMarriedOrRoommates() && !Game1.player.hasRoommate()) ?
                 Game1.player.spouse : null;
             var engaged = Game1.player.isEngaged() ? Game1.player.spouse : null;
@@ -159,6 +157,8 @@ namespace CharaChatSV
             {
                 return "The farmer has no family in Stardew Valley.";
             }
+
+            string result = "The farmer's family details: ";
 
             if (!string.IsNullOrEmpty(spouse))
             {
