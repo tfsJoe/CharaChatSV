@@ -1,11 +1,11 @@
 {
 	"Name": "CharaChatSV",
 	"Author": "ManOfCorn",
-	"Version": "1.0.0",
+	"Version": "2.0.0",
 	"Description": "Deeper conversations with the other inhabitants of Stardew Valley",
 	"UniqueID": "ManOfCorn.CharaChatSV",
 	"EntryDll": "CharaChatSV.dll",
 	"MinimumApiVersion": "4.1.0",
-	"UpdateKeys": ["Nexus:16808"],
+	"UpdateKeys": ["Nexus:16808", "GitHub:tfsJoe/CharaChatSV"],
 	"AiModel" : "default"
 }
