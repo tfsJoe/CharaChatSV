@@ -22,3 +22,9 @@ Release builds will publish a dummy version of this file; users will need to pro
 * Automated unit tests
 
 Pull requests are welcome. Please adhere to C# coding standards where possible, maintain good architecture, and provide a clear explanation of what your changes do.
+
+## For users
+
+I recommend you get [this mod from NexusMods.](https://www.nexusmods.com/stardewvalley/mods/16808) You will need [SMAPI](https://smapi.io/) as well.
+
+You will still need an API key, and you should follow the above warnings for it as well. Instructions are on the Nexus page.
