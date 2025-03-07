@@ -25,6 +25,7 @@ Release builds will publish a dummy version of this file; users will need to pro
 * Efficiency improvements. Much string manipulation was not handled in a low-garbage way.
 * Automated unit tests
 * Implement conversation summaries to feed back to the AI as memories
+* Allow conversations to affect in-game friendship levels and other base game features
 
 Pull requests are welcome. Please adhere to C# coding standards where possible, maintain good architecture, and provide a clear explanation of what your changes do.
 
