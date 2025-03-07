@@ -1,7 +1,7 @@
 {
 	"Name": "CharaChatSV",
 	"Author": "ManOfCorn",
-	"Version": "0.3.0",
+	"Version": "1.0.0",
 	"Description": "Deeper conversations with the other inhabitants of Stardew Valley",
 	"UniqueID": "ManOfCorn.CharaChatSV",
 	"EntryDll": "CharaChatSV.dll",
