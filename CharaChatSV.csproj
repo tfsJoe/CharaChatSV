@@ -11,12 +11,12 @@
 
   <!-- Normal resources -->
   <ItemGroup>
-    <EmbeddedResource Include="davinci-promptTemplate.txt">
+    <None Include="davinci-promptTemplate.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="gpt-promptTemplate.txt">
+    </None>
+    <None Include="gpt-promptTemplate.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    </None>
     <EmbeddedResource Include="davinci-requestTemplate.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -25,7 +25,7 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <!-- Copies a dummy version of the API key for release builds. Use your real  -->
+  <!-- Copies a dummy version of the API key for release builds. -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <EmbeddedResource Include="apiKeys-secret.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

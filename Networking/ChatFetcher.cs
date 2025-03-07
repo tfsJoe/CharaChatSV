@@ -15,17 +15,17 @@ namespace CharaChatSV
 {
     public abstract class ChatFetcher
     {
-        private readonly HttpClient client = new();
-        
+        public IModHelper Helper { get; private set; }
         protected abstract int RequestWaitTime { get; }
         protected abstract string CompletionsUrl { get; }
+        private readonly HttpClient client = new();
         private static bool waitForRateLimit;
         
-        public ChatFetcher(IModHelper helper)
+        protected ChatFetcher(IModHelper helper)
         {
-            var modVersion = Manifest.Inst?.Version;
-            if (modVersion == null) modVersion = "";
-            
+            Helper = helper;
+            var modVersion = Manifest.Inst?.Version ?? "";
+
             var keyManager = helper.Data.ReadJsonFile<ApiKeyManager>("apiKeys.json");
             if (keyManager == null)
             {

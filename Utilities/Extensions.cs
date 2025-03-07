@@ -37,6 +37,13 @@ namespace CharaChatSV
                 return playerChildren;
             }
         }
+        
+        public static bool IsPlayersToddler(this NPC npc)
+        {
+            var child = npc as Child;
+            if (child == null) return false;
+            return child.daysOld.Value >= 57 && PlayerChildren.Contains(child);
+        }
 
         public static bool CanChat(this NPC npc)
         {

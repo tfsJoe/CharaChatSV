@@ -61,6 +61,7 @@ namespace CharaChatSV
 		/// <returns>The Rectangle representing the emotion's coordinates in the character spritesheets.</returns>
 		public static Rectangle EmotionPortraitFromText(ref string text)
 		{
+			//TODO replace this. It uses a standard set of emotions but there is a dict of NPCs to the emotions they can show, use that instead.
 			// Tokens are prioritized in case multiple are found. Unique is not used here.
 			var tokens = new string[] { "$a", "$s", "$l", "$h", "$k" };
 			var foundToken = tokens.FirstOrDefault(text.Contains);

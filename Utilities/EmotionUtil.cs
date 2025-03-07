@@ -10,7 +10,7 @@ namespace CharaChatSV
     internal static class EmotionUtil
     {
         /// <summary>Based on inspecting the spritesheets</summary>
-        private static IReadOnlyDictionary<string, IReadOnlyList<string>> CharacterEmotions =
+        public static IReadOnlyDictionary<string, IReadOnlyList<string>> characterEmotions =
             new Dictionary<string, IReadOnlyList<string>>
             {
                 {
@@ -509,13 +509,13 @@ namespace CharaChatSV
             if (string.IsNullOrEmpty(emotion))
                 return new Rectangle(0, 0, 64, 64); // Hopefully first rect is neutral
             
-            if (!CharacterEmotions.ContainsKey(npc.Name))
+            if (!characterEmotions.ContainsKey(npc.Name))
             {
                 ModEntry.Log($"Don't know emotional range of NPC {npc.Name}");
                 return new Rectangle(0, 0, 64, 64); 
             }
             
-            var emotions = CharacterEmotions[npc.Name];
+            var emotions = characterEmotions[npc.Name];
             var index = -1;
             for (var i = 0; i < emotions.Count; ++i)
             {
@@ -540,8 +540,8 @@ namespace CharaChatSV
 
         public static IEnumerable<string> GetEmotionNames(this NPC npc)
         {
-            return CharacterEmotions.ContainsKey(npc.Name) ? 
-                CharacterEmotions[npc.Name].Where(e => e != "(skip)") :
+            return characterEmotions.ContainsKey(npc.Name) ? 
+                characterEmotions[npc.Name].Where(e => e != "(skip)") :
                 null;
         }
     }
